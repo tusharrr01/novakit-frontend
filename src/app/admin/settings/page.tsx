@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import {
   useGetAdminSettingsQuery,
   useUpdateAdminSettingsMutation,
-} from '@/src/redux/api/settingApi';
+} from '@/src/redux/api/settingsApi';
 import {
   Globe,
   Palette,
