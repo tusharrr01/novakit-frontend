@@ -9,7 +9,7 @@ import {
 } from '@/src/redux/api/catalogApi';
 import {
   useUpdateLandingPageSettingsMutation,
-} from '@/src/redux/api/adminApi';
+} from '@/src/redux/api/catalogAdminApi';
 import { Megaphone, Save, Plus, HelpCircle, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 

@@ -12,7 +12,7 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react';
-import { useGetAdminOrderStatsQuery, useGetAdminOrdersQuery } from '@/src/redux/api/adminApi';
+import { useGetAdminOrderStatsQuery, useGetAdminOrdersQuery } from '@/src/redux/api/orderApi';
 import { useCurrency } from '@/src/lib/currency';
 
 export default function AdminDashboardPage() {

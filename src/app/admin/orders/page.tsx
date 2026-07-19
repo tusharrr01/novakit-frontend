@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useGetAdminOrdersQuery } from '@/src/redux/api/adminApi';
+import { useGetAdminOrdersQuery } from '@/src/redux/api/orderApi';
 import { ShoppingBag, Search, Calendar, ChevronRight, Check } from 'lucide-react';
 import { useCurrency } from '@/src/lib/currency';
 

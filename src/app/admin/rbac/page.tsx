@@ -5,7 +5,7 @@ import {
   useGetAdminRolesQuery,
   useGetAdminPermissionsQuery,
   useUpdateAdminRoleMutation,
-} from '@/src/redux/api/adminApi';
+} from '@/src/redux/api/rbacApi';
 import { ShieldCheck, Check, Save } from 'lucide-react';
 import { toast } from 'sonner';
 

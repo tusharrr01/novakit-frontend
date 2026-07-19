@@ -8,7 +8,7 @@ import {
   useCreateAdminTemplateMutation,
   useUpdateAdminTemplateMutation,
   useDeleteAdminTemplateMutation,
-} from '@/src/redux/api/adminApi';
+} from '@/src/redux/api/catalogAdminApi';
 import { Plus, Pencil, Trash2, X, PlusCircle, CheckCircle, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCurrency } from '@/src/lib/currency';

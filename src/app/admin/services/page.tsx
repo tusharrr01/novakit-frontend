@@ -8,7 +8,7 @@ import {
   useCreateAdminServiceMutation,
   useUpdateAdminServiceMutation,
   useDeleteAdminServiceMutation,
-} from '@/src/redux/api/adminApi';
+} from '@/src/redux/api/catalogAdminApi';
 import { Plus, Pencil, Trash2, X, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCurrency } from '@/src/lib/currency';
