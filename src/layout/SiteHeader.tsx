@@ -30,7 +30,7 @@ export function SiteHeader() {
 
   const nav = [
     { label: t('Templates'), to: '/templates' },
-    { label: t('Design'), to: '/design' },
+    { label: t('Design'), to: '/designs' },
     { label: t('Services'), to: '/services' },
     { label: t('Pricing'), to: '/products' },
   ];
