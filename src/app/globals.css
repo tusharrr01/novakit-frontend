@@ -258,58 +258,52 @@
   }
 }
 
-@utility custom-scrollbar {
+.custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, var(--brand) 60%, transparent) transparent;
-
-  &::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
-  }
-  &::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px #e9edf1;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklab, var(--brand) 60%, transparent);
-  }
-  &::-webkit-scrollbar-button {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px !important;
+  height: 2px !important;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #e9edf1 !important;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--brand) 60%, transparent) !important;
+}
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.dark .custom-scrollbar {
-  &::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px var(--background);
-  }
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px var(--background) !important;
 }
 
-@utility custom-scrollbar-horizontal {
+.custom-scrollbar-horizontal {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, var(--brand) 60%, transparent) transparent;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px #e9edf1;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in oklab, var(--brand) 60%, transparent);
-    border-radius: 10px;
-  }
-  &::-webkit-scrollbar-button {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
+}
+.custom-scrollbar-horizontal::-webkit-scrollbar {
+  height: 4px !important;
+}
+.custom-scrollbar-horizontal::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px #e9edf1 !important;
+}
+.custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--brand) 60%, transparent) !important;
+  border-radius: 10px !important;
+}
+.custom-scrollbar-horizontal::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.dark .custom-scrollbar-horizontal {
-  &::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px var(--background);
-  }
+.dark .custom-scrollbar-horizontal::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px var(--background) !important;
 }
 
 @keyframes marquee-x {
