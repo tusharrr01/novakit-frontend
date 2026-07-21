@@ -41,6 +41,14 @@ import { SiteHeader } from '@/src/components/site/site-header';
 import { SiteFooter } from '@/src/components/site/site-footer';
 import { authStore, getInitials, useAuth } from '@/src/lib/auth';
 import { getPurchasesWithProduct, daysUntil, formatDate } from '@/src/lib/purchases';
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useToggleTwoFactorMutation,
+  useDeleteAccountMutation,
+} from '@/src/redux/api/authApi';
+import { useGetMyOrdersQuery } from '@/src/redux/api/orderApi';
 
 type Tab =
   | 'overview'
@@ -582,22 +590,51 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
 
 function SettingsTab() {
   const { user } = useAuth();
-  const [name, setName] = useState(user?.name ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
+  const { data: profileResp } = useGetProfileQuery(undefined);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
+
+  const profileData = profileResp?.data || user;
+
+  const [name, setName] = useState(profileData?.name ?? '');
+  const [email, setEmail] = useState(profileData?.email ?? '');
+  const [website, setWebsite] = useState(profileData?.website ?? '');
+  const [location, setLocation] = useState(profileData?.location ?? '');
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      setName(user.name);
-      setEmail(user.email);
+    if (profileData) {
+      setName(profileData.name || '');
+      setEmail(profileData.email || '');
+      setWebsite(profileData.website || '');
+      setLocation(profileData.location || '');
     }
-  }, [user]);
+  }, [profileData]);
 
-  function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
-    authStore.update({ name, email });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1600);
+    setError(null);
+    try {
+      await updateProfile({ name, website, location }).unwrap();
+      authStore.update({ name, email });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err: any) {
+      setError(err?.data?.message || 'Failed to update profile.');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action is permanent.')) {
+      try {
+        await deleteAccount(undefined).unwrap();
+        authStore.signOut();
+        window.location.href = '/';
+      } catch (err: any) {
+        alert(err?.data?.message || 'Failed to delete account.');
+      }
+    }
   }
 
   return (
@@ -605,9 +642,16 @@ function SettingsTab() {
       <Panel title="Profile information" subtitle="This is what other team members and support see.">
         <form onSubmit={save} className="grid gap-4 sm:grid-cols-2">
           <TextField icon={UserIcon} label="Full name" value={name} onChange={setName} />
-          <TextField icon={Mail} label="Email" value={email} onChange={setEmail} />
-          <TextField icon={Globe} label="Website" placeholder="https://" onChange={() => {}} value="" />
-          <TextField icon={MapPin} label="Location" placeholder="City, Country" onChange={() => {}} value="" />
+          <TextField icon={Mail} label="Email (read only)" value={email} onChange={() => {}} disabled />
+          <TextField icon={Globe} label="Website" placeholder="https://" value={website} onChange={setWebsite} />
+          <TextField icon={MapPin} label="Location" placeholder="City, Country" value={location} onChange={setLocation} />
+
+          {error && (
+            <div className="sm:col-span-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-500">
+              {error}
+            </div>
+          )}
+
           <div className="sm:col-span-2 flex items-center justify-end gap-2">
             {saved && (
               <span className="inline-flex items-center gap-1 text-xs text-emerald-500">
@@ -616,9 +660,10 @@ function SettingsTab() {
             )}
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-2 text-sm font-medium text-white shadow-lg shadow-brand/25 cursor-pointer"
+              disabled={isUpdating}
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-2 text-sm font-medium text-white shadow-lg shadow-brand/25 cursor-pointer disabled:opacity-60"
             >
-              <Save className="h-3.5 w-3.5" /> Save changes
+              <Save className="h-3.5 w-3.5" /> {isUpdating ? 'Saving...' : 'Save changes'}
             </button>
           </div>
         </form>
@@ -639,8 +684,12 @@ function SettingsTab() {
             <div className="text-sm font-medium">Delete account</div>
             <p className="text-xs text-muted-foreground">Removes your profile, purchases and access to downloads.</p>
           </div>
-          <button className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 cursor-pointer">
-            <Trash2 className="h-3.5 w-3.5" /> Delete account
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+            className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 cursor-pointer disabled:opacity-60"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> {isDeleting ? 'Deleting...' : 'Delete account'}
           </button>
         </div>
       </Panel>
@@ -648,7 +697,21 @@ function SettingsTab() {
   );
 }
 
-function TextField({ icon: Icon, label, value, onChange, placeholder }: { icon: React.ElementType; label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+function TextField({
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  placeholder,
+  disabled = false,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
@@ -658,7 +721,8 @@ function TextField({ icon: Icon, label, value, onChange, placeholder }: { icon: 
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
+          disabled={disabled}
+          className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
         />
       </div>
     </div>
@@ -680,8 +744,49 @@ function SelectRow({ label, value }: { label: string; value: string }) {
 /* ---------------- Security ---------------- */
 
 function SecurityTab() {
+  const { data: profileResp } = useGetProfileQuery(undefined);
+  const [changePassword, { isLoading: isChangingPw }] = useChangePasswordMutation();
+  const [toggle2FA, { isLoading: isToggling2FA }] = useToggleTwoFactorMutation();
+
+  const profileData = profileResp?.data;
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [show, setShow] = useState(false);
-  const [twofa, setTwofa] = useState(false);
+  const [twofa, setTwofa] = useState(profileData?.two_factor_enabled ?? false);
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profileData) {
+      setTwofa(Boolean(profileData.two_factor_enabled));
+    }
+  }, [profileData]);
+
+  async function handlePasswordUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    setPwError(null);
+    setPwSuccess(false);
+    try {
+      await changePassword({ currentPassword, newPassword }).unwrap();
+      setPwSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setTimeout(() => setPwSuccess(false), 2000);
+    } catch (err: any) {
+      setPwError(err?.data?.message || 'Password update failed.');
+    }
+  }
+
+  async function handleToggle2FA() {
+    try {
+      const res = await toggle2FA(undefined).unwrap();
+      setTwofa(res?.data?.two_factor_enabled ?? !twofa);
+    } catch {
+      setTwofa(!twofa);
+    }
+  }
+
   const sessions = useMemo(
     () => [
       { device: 'MacBook Pro · Chrome', location: 'London, UK', last: 'Active now', current: true, icon: LayoutDashboard },
@@ -694,12 +799,41 @@ function SecurityTab() {
   return (
     <div className="space-y-6">
       <Panel title="Password" subtitle="Use a strong, unique password.">
-        <form onSubmit={(e) => e.preventDefault()} className="grid gap-4 sm:grid-cols-2">
-          <PasswordField label="Current password" show={show} setShow={setShow} />
-          <PasswordField label="New password" show={show} setShow={setShow} />
+        <form onSubmit={handlePasswordUpdate} className="grid gap-4 sm:grid-cols-2">
+          <PasswordField
+            label="Current password"
+            value={currentPassword}
+            onChange={setCurrentPassword}
+            show={show}
+            setShow={setShow}
+          />
+          <PasswordField
+            label="New password"
+            value={newPassword}
+            onChange={setNewPassword}
+            show={show}
+            setShow={setShow}
+          />
+
+          {pwError && (
+            <div className="sm:col-span-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-500">
+              {pwError}
+            </div>
+          )}
+
+          {pwSuccess && (
+            <div className="sm:col-span-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-500">
+              Password updated successfully!
+            </div>
+          )}
+
           <div className="sm:col-span-2 flex justify-end">
-            <button className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-2 text-sm font-medium text-white cursor-pointer">
-              <Key className="h-3.5 w-3.5" /> Update password
+            <button
+              type="submit"
+              disabled={isChangingPw || !currentPassword || !newPassword}
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-2 text-sm font-medium text-white cursor-pointer disabled:opacity-60"
+            >
+              <Key className="h-3.5 w-3.5" /> {isChangingPw ? 'Updating...' : 'Update password'}
             </button>
           </div>
         </form>
@@ -717,10 +851,11 @@ function SecurityTab() {
             </div>
           </div>
           <button
-            onClick={() => setTwofa((v) => !v)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium cursor-pointer ${twofa ? 'border border-border bg-background hover:border-brand/40' : 'bg-brand-gradient text-white'}`}
+            onClick={handleToggle2FA}
+            disabled={isToggling2FA}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium cursor-pointer disabled:opacity-60 ${twofa ? 'border border-border bg-background hover:border-brand/40' : 'bg-brand-gradient text-white'}`}
           >
-            {twofa ? 'Disable' : 'Enable 2FA'}
+            {isToggling2FA ? 'Updating...' : twofa ? 'Disable' : 'Enable 2FA'}
           </button>
         </div>
       </Panel>
@@ -759,7 +894,19 @@ function SecurityTab() {
   );
 }
 
-function PasswordField({ label, show, setShow }: { label: string; show: boolean; setShow: (v: boolean) => void }) {
+function PasswordField({
+  label,
+  value,
+  onChange,
+  show,
+  setShow,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  show: boolean;
+  setShow: (v: boolean) => void;
+}) {
   return (
     <div>
       <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</label>
@@ -767,6 +914,8 @@ function PasswordField({ label, show, setShow }: { label: string; show: boolean;
         <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type={show ? 'text' : 'password'}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           placeholder="••••••••"
           className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-11 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
         />
