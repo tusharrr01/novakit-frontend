@@ -17,6 +17,7 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react';
+import { DataTable, ColumnDef } from '@/src/components/shared/DataTable';
 
 type Plan = {
   id: string;
@@ -510,78 +511,77 @@ function CustomerPlans({
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="overflow-hidden admin-card-static">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border bg-accent/30">
-                <tr>
-                  <th className="p-3">Customer</th>
-                  <th className="p-3">Plan tier</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Amount</th>
-                  <th className="p-3">Billing Started</th>
-                  <th className="p-3">Next Renewal</th>
-                  <th className="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-accent/20">
-                    <td className="p-3">
-                      <div>
-                        <div className="font-semibold text-foreground">{c.customerName}</div>
-                        <div className="text-xs text-muted-foreground">{c.customerEmail}</div>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${
-                        c.planName === 'Studio' ? 'bg-brand/20 text-brand border-brand/20' : 'bg-muted text-muted-foreground border-border'
-                      }`}>
-                        {c.planName}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${
-                        c.status === 'Active' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                        c.status === 'Trialing' ? 'bg-sky-500/10 text-sky-500 border-sky-500/20' :
-                        c.status === 'Past Due' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                        'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="p-3 font-medium">
-                      ${c.amount} <span className="text-[10px] text-muted-foreground">/ {c.period}</span>
-                    </td>
-                    <td className="p-3 text-muted-foreground">{c.startedAt}</td>
-                    <td className="p-3 text-muted-foreground">{c.renewsAt}</td>
-                    <td className="p-3 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setViewItem(c)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
-                        >
-                          <Info className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setEditItem(c)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="p-12 text-center text-sm text-muted-foreground">
-                      No customer subscriptions found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <DataTable
+          data={filtered}
+          columns={[
+            {
+              header: 'Customer',
+              cell: (row: any) => (
+                <div>
+                  <div className="font-semibold text-foreground">{row.customerName}</div>
+                  <div className="text-xs text-muted-foreground">{row.customerEmail}</div>
+                </div>
+              ),
+            },
+            {
+              header: 'Plan tier',
+              cell: (row: any) => (
+                <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${
+                  row.planName === 'Studio' ? 'bg-brand/20 text-brand border-brand/20' : 'bg-muted text-muted-foreground border-border'
+                }`}>
+                  {row.planName}
+                </span>
+              ),
+            },
+            {
+              header: 'Status',
+              cell: (row: any) => (
+                <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${
+                  row.status === 'Active' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                  row.status === 'Trialing' ? 'bg-sky-500/10 text-sky-500 border-sky-500/20' :
+                  row.status === 'Past Due' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                  'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                }`}>
+                  {row.status}
+                </span>
+              ),
+            },
+            {
+              header: 'Amount',
+              cell: (row: any) => (
+                <span className="font-medium">
+                  ${row.amount} <span className="text-[10px] text-muted-foreground">/ {row.period}</span>
+                </span>
+              ),
+            },
+            {
+              header: 'Billing Started',
+              accessorKey: 'startedAt',
+            },
+            {
+              header: 'Next Renewal',
+              accessorKey: 'renewsAt',
+            },
+          ]}
+          renderActions={(row: any) => (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setViewItem(row)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+              >
+                <Info className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setEditItem(row)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+          pagination={false}
+          getRowId={(row: any) => row.id}
+        />
         </div>
       </div>
 

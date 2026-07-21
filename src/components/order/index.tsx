@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ORDERS, ORDER_STATUSES, findOrder, formatOrderDate, productFor, type Order, type OrderStatus } from '@/src/lib/orders';
 import { useCurrency } from '@/src/lib/currency';
+import { DataTable, ColumnDef } from '@/src/components/shared/DataTable';
 
 function statusClasses(s: OrderStatus) {
   switch (s) {
@@ -170,57 +171,80 @@ export function OrdersTab() {
       {/* Table */}
       <div className="mt-5 min-h-0 flex-1 overflow-hidden rounded-lg border border-border/70 bg-card">
         <div className="h-full overflow-auto custom-scrollbar">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-card text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr className="border-b border-border">
-                <th className="p-4 font-medium">Order</th>
-                <th className="p-4 font-medium">Customer</th>
-                <th className="p-4 font-medium">Items</th>
-                <th className="p-4 font-medium">Placed</th>
-                <th className="p-4 font-medium">Payment</th>
-                <th className="p-4 font-medium text-right">Total</th>
-                <th className="p-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-10 text-center text-sm text-muted-foreground">
-                    No orders match your filters.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((o) => {
-                  const first = productFor(o.items[0].productSlug);
-                  const extra = o.items.length - 1;
-                  return (
-                    <tr
-                      key={o.id}
-                      onClick={() => setSelected(o.id)}
-                      className="cursor-pointer border-b border-border/70 last:border-0 hover:bg-accent/40"
-                    >
-                      <td className="p-4 font-mono text-xs">{o.id}</td>
-                      <td className="p-4">
-                        <div className="font-medium">{o.customer.name}</div>
-                        <div className="text-xs text-muted-foreground">{o.customer.email}</div>
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        <span className="text-foreground">{first?.name ?? o.items[0].productSlug}</span>
-                        {extra > 0 && <span className="ml-1 text-xs">+{extra} more</span>}
-                        <div className="text-xs">{o.items[0].license} license</div>
-                      </td>
-                      <td className="p-4 text-xs text-muted-foreground">{formatOrderDate(o.placedAt)}</td>
-                      <td className="p-4 text-xs text-muted-foreground">{o.paymentMethod}</td>
-                      <td className="p-4 text-right font-medium">{format(o.total)}</td>
-                      <td className="p-4">
-                        <StatusPill status={o.status} />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <DataTable
+          data={filtered}
+          columns={[
+            {
+              header: 'Order',
+              cell: (row) => (
+                <button
+                  type="button"
+                  onClick={() => setSelected(row.id)}
+                  className="font-mono text-xs text-indigo-600 dark:text-indigo-400 hover:underline text-left font-semibold"
+                >
+                  {row.id}
+                </button>
+              ),
+            },
+            {
+              header: 'Customer',
+              cell: (row) => (
+                <div onClick={() => setSelected(row.id)} className="cursor-pointer">
+                  <div className="font-medium text-foreground">{row.customer.name}</div>
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400">{row.customer.email}</div>
+                </div>
+              ),
+            },
+            {
+              header: 'Items',
+              cell: (row) => {
+                const first = productFor(row.items[0].productSlug);
+                const extra = row.items.length - 1;
+                return (
+                  <div onClick={() => setSelected(row.id)} className="cursor-pointer text-neutral-500 dark:text-neutral-400">
+                    <span className="text-foreground font-medium">{first?.name ?? row.items[0].productSlug}</span>
+                    {extra > 0 && <span className="ml-1 text-xs text-neutral-400 font-normal">+{extra} more</span>}
+                    <div className="text-xs">{row.items[0].license} license</div>
+                  </div>
+                );
+              },
+            },
+            {
+              header: 'Placed',
+              cell: (row) => (
+                <span onClick={() => setSelected(row.id)} className="cursor-pointer text-xs text-neutral-500">
+                  {formatOrderDate(row.placedAt)}
+                </span>
+              ),
+            },
+            {
+              header: 'Payment',
+              cell: (row) => (
+                <span onClick={() => setSelected(row.id)} className="cursor-pointer text-xs text-neutral-500">
+                  {row.paymentMethod}
+                </span>
+              ),
+            },
+            {
+              header: 'Total',
+              cell: (row) => (
+                <span onClick={() => setSelected(row.id)} className="cursor-pointer font-medium text-right block w-full">
+                  {format(row.total)}
+                </span>
+              ),
+            },
+            {
+              header: 'Status',
+              cell: (row) => (
+                <div onClick={() => setSelected(row.id)} className="cursor-pointer">
+                  <StatusPill status={row.status} />
+                </div>
+              ),
+            },
+          ]}
+          pagination={false}
+          getRowId={(row) => row.id}
+        />
         </div>
       </div>
     </div>

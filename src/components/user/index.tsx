@@ -31,7 +31,9 @@ import {
   Globe,
   Star,
   CreditCard,
+  Download,
 } from 'lucide-react';
+import { DataTable, ColumnDef } from '@/src/components/shared/DataTable';
 
 type User = {
   id: string;
@@ -339,108 +341,86 @@ export function UsersTab() {
         )}
 
         {/* Table */}
-        <div className="overflow-hidden admin-card-static">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="w-10 p-3">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      onChange={toggleSelectAll}
-                      className="h-4 w-4 rounded border-border accent-[var(--brand)]"
-                    />
-                  </th>
-                  <SortableTh label="User" sortKey="name" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
-                  <SortableTh label="Email" sortKey="email" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
-                  <SortableTh label="Role" sortKey="role" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
-                  <SortableTh label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onClick={toggleSort} />
-                  <SortableTh label="Spend" sortKey="spend" activeKey={sortKey} dir={sortDir} onClick={toggleSort} align="right" />
-                  <th className="p-3 text-right font-medium text-muted-foreground uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((u) => (
-                  <tr key={u.id} className="border-b border-border last:border-0 hover:bg-accent/40">
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.has(u.id)}
-                        onChange={() => toggleSelect(u.id)}
-                        className="h-4 w-4 rounded border-border accent-[var(--brand)]"
-                      />
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white">
-                          {u.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
-                        </span>
-                        <div>
-                          <div className="font-medium">{u.name}</div>
-                          <div className="text-xs text-muted-foreground">{u.country}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3 text-muted-foreground">{u.email}</td>
-                    <td className="p-3 text-sm">{u.role}</td>
-                    <td className="p-3">
-                      <StatusPill status={u.status} />
-                    </td>
-                    <td className="p-3 text-right font-medium">${u.spend.toLocaleString()}</td>
-                    <td className="p-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setInfoUser(u)}
-                          title="View details"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
-                        >
-                          <Info className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditUser(u);
-                            setView('edit');
-                          }}
-                          title="Edit user"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteUserId(u.id)}
-                          title="Delete user"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {sorted.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="p-12 text-center text-sm text-muted-foreground">
-                      No users match your filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex items-center justify-between border-t border-border p-3 text-xs text-muted-foreground">
-            <span>Showing {sorted.length} results</span>
-            <div className="flex items-center gap-1">
-              <button className="rounded-md border border-border px-2 py-1 hover:bg-accent"><ChevronLeft className="h-3 w-3" /></button>
-              <button className="rounded-md border border-border bg-accent px-2 py-1 text-foreground">1</button>
-              <button className="rounded-md border border-border px-2 py-1 hover:bg-accent">2</button>
-              <button className="rounded-md border border-border px-2 py-1 hover:bg-accent"><ChevronRight className="h-3 w-3" /></button>
+        <DataTable
+          data={sorted}
+          columns={[
+            {
+              header: 'User',
+              cell: (row) => (
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white">
+                    {row.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+                  </span>
+                  <div>
+                    <div className="font-medium">{row.name}</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{row.country}</div>
+                  </div>
+                </div>
+              ),
+              sortable: true,
+              sortKey: 'name',
+            },
+            {
+              header: 'Email',
+              accessorKey: 'email',
+              sortable: true,
+            },
+            {
+              header: 'Role',
+              accessorKey: 'role',
+              sortable: true,
+            },
+            {
+              header: 'Status',
+              cell: (row) => <StatusPill status={row.status} />,
+              sortable: true,
+              sortKey: 'status',
+            },
+            {
+              header: 'Spend',
+              cell: (row) => <span className="font-medium">${row.spend.toLocaleString()}</span>,
+              sortable: true,
+              sortKey: 'spend',
+              className: 'text-right',
+            },
+          ]}
+          selectedIds={Array.from(selected)}
+          onSelectionChange={(ids) => setSelected(new Set(ids))}
+          onSortChange={(sortBy) => toggleSort(sortBy as any)}
+          renderActions={(row) => (
+            <div className="flex items-center justify-end gap-1">
+              <button
+                type="button"
+                onClick={() => setInfoUser(row)}
+                title="View details"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+              >
+                <Info className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditUser(row);
+                  setView('edit');
+                }}
+                title="Edit user"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteUserId(row.id)}
+                title="Delete user"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
-          </div>
-        </div>
+          )}
+          pagination={false}
+          getRowId={(row) => row.id}
+        />
       </div>
 
       {infoUser && <UserInfoModal user={infoUser} onClose={() => setInfoUser(null)} />}

@@ -36,6 +36,23 @@ import {
   type DesignRow,
 } from '@/src/lib/designs-db';
 import { SandpackPreview } from '@/src/components/design/sandpack-preview';
+import { DataTable } from '@/src/components/shared/DataTable';
+
+function DesignThumbnail({ path }: { path?: string | null }) {
+  const [thumb, setThumb] = useState<string | null>(null);
+  useEffect(() => {
+    if (path) {
+      signedThumbnailUrl(path).then(setThumb);
+    }
+  }, [path]);
+  return thumb ? (
+    <img src={thumb} alt="" className="h-full w-full object-cover" />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+      <ImageIcon className="h-3.5 w-3.5" />
+    </div>
+  );
+}
 
 const LANGUAGES: { key: BundleLanguage; label: string }[] = [
   { key: 'react', label: 'React' },
@@ -208,24 +225,85 @@ function DesignsList({
             </button>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-2 font-medium">Design</th>
-                <th className="px-4 py-2 font-medium">Category</th>
-                <th className="px-4 py-2 font-medium">Bundles</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Views</th>
-                <th className="px-4 py-2 font-medium">Updated</th>
-                <th className="px-4 py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d) => (
-                <DesignRowItem key={d.id} d={d} onEdit={onEdit} onInfo={onInfo} onDeleted={refresh} />
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            data={filtered}
+            columns={[
+              {
+                header: 'Design',
+                cell: (row) => (
+                  <button
+                    onClick={() => onInfo(row.id)}
+                    className="flex items-center gap-3 text-left"
+                  >
+                    <div className="h-9 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+                      <DesignThumbnail path={row.thumbnail_path} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium">{row.name}</div>
+                      <div className="truncate text-xs text-muted-foreground">/{row.slug}</div>
+                    </div>
+                  </button>
+                ),
+              },
+              {
+                header: 'Category',
+                accessorKey: 'category',
+              },
+              {
+                header: 'Bundles',
+                cell: (row) => (
+                  <div className="flex flex-wrap gap-1">
+                    {row.bundles.map((b) => (
+                      <span
+                        key={b.id}
+                        className="rounded-full border border-border bg-background px-1.5 py-0.5 text-[10px] uppercase"
+                      >
+                        {b.language}
+                      </span>
+                    ))}
+                    {row.bundles.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                  </div>
+                ),
+              },
+              {
+                header: 'Status',
+                cell: (row) => <StatusPill status={row.status} />,
+              },
+              {
+                header: 'Views',
+                accessorKey: 'views',
+              },
+              {
+                header: 'Updated',
+                cell: (row) => <span>{new Date(row.updated_at).toLocaleDateString()}</span>,
+              },
+            ]}
+            onDelete={async (row) => {
+              if (!confirm(`Delete "${row.name}"?`)) return;
+              await deleteDesign(row.id);
+              refresh();
+            }}
+            renderActions={(row) => (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onInfo(row.id)}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  title="View"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => onEdit(row.id)}
+                  className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  title="Edit"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            pagination={false}
+            getRowId={(row) => row.id}
+          />
         )}
       </div>
 
@@ -240,97 +318,6 @@ function DesignsList({
   );
 }
 
-function DesignRowItem({
-  d,
-  onEdit,
-  onInfo,
-  onDeleted,
-}: {
-  d: DesignRow;
-  onEdit: (id: string) => void;
-  onInfo: (id: string) => void;
-  onDeleted: () => void;
-}) {
-  const [thumb, setThumb] = useState<string | null>(null);
-  useEffect(() => {
-    signedThumbnailUrl(d.thumbnail_path).then(setThumb);
-  }, [d.thumbnail_path]);
-
-  return (
-    <tr className="border-b border-border last:border-b-0 hover:bg-accent/40">
-      <td className="px-4 py-2">
-        <button
-          onClick={() => onInfo(d.id)}
-          className="flex items-center gap-3 text-left"
-        >
-          <div className="h-9 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-            {thumb ? (
-              <img src={thumb} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                <ImageIcon className="h-3.5 w-3.5" />
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-medium">{d.name}</div>
-            <div className="truncate text-xs text-muted-foreground">/{d.slug}</div>
-          </div>
-        </button>
-      </td>
-      <td className="px-4 py-2 text-muted-foreground">{d.category}</td>
-      <td className="px-4 py-2">
-        <div className="flex flex-wrap gap-1">
-          {d.bundles.map((b) => (
-            <span
-              key={b.id}
-              className="rounded-full border border-border bg-background px-1.5 py-0.5 text-[10px] uppercase"
-            >
-              {b.language}
-            </span>
-          ))}
-          {d.bundles.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
-        </div>
-      </td>
-      <td className="px-4 py-2">
-        <StatusPill status={d.status} />
-      </td>
-      <td className="px-4 py-2 text-muted-foreground">{d.views}</td>
-      <td className="px-4 py-2 text-xs text-muted-foreground">
-        {new Date(d.updated_at).toLocaleDateString()}
-      </td>
-      <td className="px-4 py-2">
-        <div className="flex items-center justify-end gap-1">
-          <button
-            onClick={() => onInfo(d.id)}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-            title="View"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={() => onEdit(d.id)}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-            title="Edit"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={async () => {
-              if (!confirm(`Delete "${d.name}"?`)) return;
-              await deleteDesign(d.id);
-              onDeleted();
-            }}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            title="Delete"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-}
 
 function StatusPill({ status }: { status: DesignRow['status'] }) {
   const styles: Record<DesignRow['status'], string> = {
