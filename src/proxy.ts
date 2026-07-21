@@ -17,8 +17,8 @@ export async function proxy(req: NextRequest) {
       return NextResponse.redirect(new URL(callbackUrl, req.url));
     }
 
-    const role = token?.role;
-    if (role === 'Admin') {
+    const role = token?.role?.toString().toLowerCase();
+    if (role === 'admin') {
       return NextResponse.redirect(new URL('/admin', req.url));
     }
     return NextResponse.redirect(new URL('/', req.url));
@@ -36,10 +36,10 @@ export async function proxy(req: NextRequest) {
 
   // Centralized Admin role guard
   if (pathname.startsWith('/admin') && isAuthenticated) {
-    const role = token?.role;
-    if (role !== 'Admin') {
+    const role = token?.role?.toString().toLowerCase();
+    if (role !== 'admin') {
       // Redirect unauthorized user to their profile page
-      return NextResponse.redirect(new URL('/profile', req.url));
+      return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
