@@ -3,6 +3,6 @@
 import React from 'react';
 import { ProductsTab } from '@/src/components/admin/products-tab';
 
-export default function AdminServicesPage() {
+export default function AdminServiceManagementPage() {
   return <ProductsTab sub="services" />;
 }
