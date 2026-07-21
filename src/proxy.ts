@@ -10,11 +10,18 @@ export async function proxy(req: NextRequest) {
   // Role-based auth redirect
   const isAuthPage = pathname.startsWith('/auth');
   if (isAuthPage && isAuthenticated) {
+    const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
+    
+    // Redirect to callbackUrl if present and valid (starts with / to prevent external open redirects)
+    if (callbackUrl && callbackUrl.startsWith('/')) {
+      return NextResponse.redirect(new URL(callbackUrl, req.url));
+    }
+
     const role = token?.role;
     if (role === 'Admin') {
       return NextResponse.redirect(new URL('/admin', req.url));
     }
-    return NextResponse.redirect(new URL('/profile', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // Define protected pages that require authentication
