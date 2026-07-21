@@ -73,13 +73,13 @@ export function SiteHeader() {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/auth/login"
                 className="hidden rounded-full px-3 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 transition hover:text-neutral-900 dark:hover:text-white sm:inline-flex"
               >
                 {t('Sign in')}
               </Link>
               <Link
-                href="/register"
+                href="/auth/register"
                 className="hidden items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 sm:inline-flex"
               >
                 {t('Get started')} <ArrowRight className="h-3.5 w-3.5" />
@@ -118,10 +118,10 @@ export function SiteHeader() {
               </Link>
             ) : (
               <div className="mt-2 flex gap-2 border-t border-neutral-200 dark:border-neutral-800 pt-3">
-                <Link href="/login" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-800 px-3 py-2 text-center text-sm text-neutral-700 dark:text-neutral-300">
+                <Link href="/auth/login" onClick={() => setOpen(false)} className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-800 px-3 py-2 text-center text-sm text-neutral-700 dark:text-neutral-300">
                   {t('Sign in')}
                 </Link>
-                <Link href="/register" onClick={() => setOpen(false)} className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white">
+                <Link href="/auth/register" onClick={() => setOpen(false)} className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white">
                   {t('Get started')}
                 </Link>
               </div>

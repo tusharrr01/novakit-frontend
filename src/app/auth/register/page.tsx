@@ -62,9 +62,9 @@ export default function RegisterPage() {
         redirect: false,
       });
       if (result?.error) {
-        router.push('/login');
+        router.push('/auth/login');
       } else {
-        router.push('/otp'); // Go to OTP verification page!
+        router.push('/auth/otp'); // Go to OTP verification page!
       }
     } catch {
       setError('Something went wrong. Please try again.');
@@ -90,7 +90,7 @@ export default function RegisterPage() {
       footer={
         <>
           {cfg.footerText}{' '}
-          <Link href="/login" className="font-medium text-brand hover:underline">
+          <Link href="/auth/login" className="font-medium text-brand hover:underline">
             {cfg.footerLinkLabel}
           </Link>
         </>

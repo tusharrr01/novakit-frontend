@@ -32,11 +32,11 @@ export const AUTH_PAGE_META: {
   route: string;
   fieldKeys: string[];
 }[] = [
-  { key: 'login', label: 'Sign in', route: '/login', fieldKeys: ['email', 'password'] },
-  { key: 'register', label: 'Register', route: '/register', fieldKeys: ['name', 'email', 'password'] },
-  { key: 'forgotPassword', label: 'Forgot password', route: '/forgot-password', fieldKeys: ['email'] },
-  { key: 'resetPassword', label: 'Reset password', route: '/reset-password', fieldKeys: ['password', 'confirmPassword'] },
-  { key: 'otp', label: 'OTP verification', route: '/otp', fieldKeys: [] },
+  { key: 'login', label: 'Sign in', route: '/auth/login', fieldKeys: ['email', 'password'] },
+  { key: 'register', label: 'Register', route: '/auth/register', fieldKeys: ['name', 'email', 'password'] },
+  { key: 'forgotPassword', label: 'Forgot password', route: '/auth/forgot-password', fieldKeys: ['email'] },
+  { key: 'resetPassword', label: 'Reset password', route: '/auth/reset-password', fieldKeys: ['password', 'confirmPassword'] },
+  { key: 'otp', label: 'OTP verification', route: '/auth/otp', fieldKeys: [] },
 ];
 
 export const defaultAuthContent: AuthContent = {

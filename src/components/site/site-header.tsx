@@ -66,13 +66,13 @@ export function SiteHeader() {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/auth/login"
                 className="hidden rounded-full px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground sm:inline-flex"
               >
                 {t('Sign in')}
               </Link>
               <Link
-                href="/register"
+                href="/auth/register"
                 className="hidden items-center gap-1.5 rounded-full bg-brand-gradient px-4 py-1.5 text-sm font-medium text-white shadow-lg shadow-brand/20 transition hover:opacity-90 sm:inline-flex"
               >
                 {t('Get started')} <ArrowRight className="h-3.5 w-3.5" />
@@ -111,10 +111,10 @@ export function SiteHeader() {
               </Link>
             ) : (
               <div className="mt-2 flex gap-2 border-t border-border/60 pt-3">
-                <Link href="/login" className="flex-1 rounded-lg border border-border px-3 py-2 text-center text-sm">
+                <Link href="/auth/login" className="flex-1 rounded-lg border border-border px-3 py-2 text-center text-sm">
                   {t('Sign in')}
                 </Link>
-                <Link href="/register" className="flex-1 rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white">
+                <Link href="/auth/register" className="flex-1 rounded-lg bg-brand-gradient px-3 py-2 text-center text-sm font-medium text-white">
                   {t('Get started')}
                 </Link>
               </div>

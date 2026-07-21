@@ -69,7 +69,7 @@ function LoginForm() {
       footer={
         <>
           {cfg.footerText}{' '}
-          <Link href="/register" className="font-medium text-brand hover:underline">
+          <Link href="/auth/register" className="font-medium text-brand hover:underline">
             {cfg.footerLinkLabel}
           </Link>
         </>
@@ -124,7 +124,7 @@ function LoginForm() {
             <label className="text-xs font-medium text-muted-foreground">
               {passwordField?.label ?? 'Password'}
             </label>
-            <Link href="/forgot-password" className="text-xs text-brand hover:underline">
+            <Link href="/auth/forgot-password" className="text-xs text-brand hover:underline">
               Forgot?
             </Link>
           </div>

@@ -28,7 +28,7 @@ export default function ResetPasswordPage() {
       title={cfg.title}
       subtitle={cfg.subtitle}
       footer={
-        <Link href="/login" className="text-brand hover:underline">
+        <Link href="/auth/login" className="text-brand hover:underline">
           {cfg.footerLinkLabel}
         </Link>
       }
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <Link
-          href="/login"
+          href="/auth/login"
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient text-sm font-medium text-white shadow-lg shadow-brand/25 transition hover:opacity-95"
         >
           {cfg.submitLabel} <ArrowRight className="h-4 w-4" />

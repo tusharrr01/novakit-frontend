@@ -43,7 +43,7 @@ export default function OtpPage() {
       footer={
         <>
           {cfg.footerText}{' '}
-          <Link href="/register" className="font-medium text-brand hover:underline">
+          <Link href="/auth/register" className="font-medium text-brand hover:underline">
             {cfg.footerLinkLabel}
           </Link>
         </>

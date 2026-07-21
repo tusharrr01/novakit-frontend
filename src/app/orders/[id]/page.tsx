@@ -72,7 +72,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (hydrated && !isAuthenticated) router.push('/login');
+    if (hydrated && !isAuthenticated) router.push('/auth/login');
   }, [hydrated, isAuthenticated, router]);
 
   if (!order) {

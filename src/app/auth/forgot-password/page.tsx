@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
           : cfg.subtitle
       }
       footer={
-        <Link href="/login" className="inline-flex items-center gap-1 text-brand hover:underline">
+        <Link href="/auth/login" className="inline-flex items-center gap-1 text-brand hover:underline">
           <ArrowLeft className="h-3.5 w-3.5" /> {cfg.footerLinkLabel}
         </Link>
       }

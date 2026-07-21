@@ -46,7 +46,7 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<'All' | OrderStatus>('All');
 
   useEffect(() => {
-    if (hydrated && !isAuthenticated) router.push('/login');
+    if (hydrated && !isAuthenticated) router.push('/auth/login');
   }, [hydrated, isAuthenticated, router]);
 
   const filtered = useMemo(() => {

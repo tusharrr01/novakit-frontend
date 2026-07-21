@@ -70,7 +70,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) {
-      router.push('/login');
+      router.push('/auth/login');
     }
   }, [hydrated, isAuthenticated, router]);
 
