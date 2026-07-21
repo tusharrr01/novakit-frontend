@@ -90,6 +90,7 @@ export const baseApi = createApi({
     'Services',
     'Landing',
     'Languages',
+    'Pages',
   ],
   baseQuery: baseQueryWithLogout,
   endpoints: () => ({}),

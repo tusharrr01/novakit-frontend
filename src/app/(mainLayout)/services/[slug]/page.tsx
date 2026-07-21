@@ -3,9 +3,9 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { useGetServiceBySlugQuery, useGetServicesQuery } from '@/src/redux/api/serviceApi';
-import { CatalogDetail, CatalogNotFound } from '@/src/components/reusable/CatalogDetail';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { ServiceDetail, ServiceNotFound } from '@/src/components/service/ServiceDetail';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 
 export default function ServiceDetailPage() {
   const { slug } = useParams();
@@ -34,7 +34,7 @@ export default function ServiceDetailPage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950 flex flex-col text-neutral-900 dark:text-neutral-50">
       <SiteHeader />
       {item ? (
-        <CatalogDetail
+        <ServiceDetail
           item={item}
           related={related}
           listTo="/services"
@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
           relatedEyebrow="Related Services"
         />
       ) : (
-        <CatalogNotFound listTo="/services" crumbLabel="Services" />
+        <ServiceNotFound listTo="/services" crumbLabel="Services" />
       )}
       <SiteFooter />
     </div>

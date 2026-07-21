@@ -3,9 +3,9 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { useGetDesignBySlugQuery, useGetDesignsQuery } from '@/src/redux/api/designApi';
-import { CatalogDetail, CatalogNotFound } from '@/src/components/reusable/CatalogDetail';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { DesignDetail, DesignNotFound } from '@/src/components/design/DesignDetail';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 
 export default function DesignDetailPage() {
   const { slug } = useParams();
@@ -34,7 +34,7 @@ export default function DesignDetailPage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950 flex flex-col text-neutral-900 dark:text-neutral-50">
       <SiteHeader />
       {item ? (
-        <CatalogDetail
+        <DesignDetail
           item={item}
           related={related}
           listTo="/designs"
@@ -44,7 +44,7 @@ export default function DesignDetailPage() {
           relatedEyebrow="Related Designs"
         />
       ) : (
-        <CatalogNotFound listTo="/designs" crumbLabel="Designs" />
+        <DesignNotFound listTo="/designs" crumbLabel="Designs" />
       )}
       <SiteFooter />
     </div>

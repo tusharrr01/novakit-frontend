@@ -18,8 +18,8 @@ import {
   Copy,
   ExternalLink,
 } from 'lucide-react';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 import { useAuth } from '@/src/lib/auth';
 import { useCurrency } from '@/src/lib/currency';
 import { findOrder, formatOrderDate, productFor, type OrderStatus } from '@/src/lib/orders';

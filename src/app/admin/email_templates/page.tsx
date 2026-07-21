@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { EmailTemplatesTab } from '@/src/components/admin/emails-tab';
+import { EmailTemplatesTab } from '@/src/components/email';
 
 export default function AdminEmailTemplatesPage() {
   return <EmailTemplatesTab />;

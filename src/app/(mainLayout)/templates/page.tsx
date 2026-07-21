@@ -1,9 +1,9 @@
 'use client';
 
-import { CatalogList } from '@/src/components/reusable/CatalogList';
+import { TemplateList } from '@/src/components/template/TemplateList';
 import { useGetTemplatesQuery } from '@/src/redux/api/templateApi';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 
 export default function TemplatesPage() {
   const { data, isLoading } = useGetTemplatesQuery(undefined);
@@ -19,7 +19,7 @@ export default function TemplatesPage() {
           Loading templates catalog...
         </div>
       ) : (
-        <CatalogList
+        <TemplateList
           items={items}
           eyebrow="React & Tailwind Templates"
           title="Beautifully crafted UI starters."
@@ -33,3 +33,4 @@ export default function TemplatesPage() {
     </div>
   );
 }
+

@@ -3,9 +3,9 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import { useGetTemplateBySlugQuery, useGetTemplatesQuery } from '@/src/redux/api/templateApi';
-import { CatalogDetail, CatalogNotFound } from '@/src/components/reusable/CatalogDetail';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { TemplateDetail, TemplateNotFound } from '@/src/components/template/TemplateDetail';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 
 export default function TemplateDetailPage() {
   const { slug } = useParams();
@@ -34,7 +34,7 @@ export default function TemplateDetailPage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950 flex flex-col text-neutral-900 dark:text-neutral-50">
       <SiteHeader />
       {item ? (
-        <CatalogDetail
+        <TemplateDetail
           item={item}
           related={related}
           listTo="/templates"
@@ -44,7 +44,7 @@ export default function TemplateDetailPage() {
           relatedEyebrow="Related Templates"
         />
       ) : (
-        <CatalogNotFound listTo="/templates" crumbLabel="Templates" />
+        <TemplateNotFound listTo="/templates" crumbLabel="Templates" />
       )}
       <SiteFooter />
     </div>

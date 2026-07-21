@@ -28,9 +28,9 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 
-import { ThemeToggle } from '@/src/layout/theme-toggle';
-import { Logo } from '@/src/layout/logo';
-import { LanguageSwitcher, CurrencySwitcher } from '@/src/components/site/site-header';
+import { ThemeToggle } from '@/src/components/layout/ThemeToggle';
+import { Logo } from '@/src/components/layout/Logo';
+import { LanguageSwitcher, CurrencySwitcher } from '@/src/components/layout/SiteHeader';
 import { NotificationsBell } from '@/src/components/admin/notifications-bell';
 import { getInitials } from '@/src/lib/auth';
 
@@ -307,3 +307,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+

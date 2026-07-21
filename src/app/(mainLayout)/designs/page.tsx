@@ -1,9 +1,9 @@
 'use client';
 
-import { CatalogList } from '@/src/components/reusable/CatalogList';
+import { DesignList } from '@/src/components/design/DesignList';
 import { useGetDesignsQuery } from '@/src/redux/api/designApi';
-import { SiteHeader } from '@/src/layout/site-header';
-import { SiteFooter } from '@/src/layout/site-footer';
+import { SiteHeader } from '@/src/components/layout/SiteHeader';
+import { SiteFooter } from '@/src/components/layout/SiteFooter';
 
 export default function DesignsPage() {
   const { data, isLoading } = useGetDesignsQuery(undefined);
@@ -19,7 +19,7 @@ export default function DesignsPage() {
           Loading designs catalog...
         </div>
       ) : (
-        <CatalogList
+        <DesignList
           items={items}
           eyebrow="Figma Design Systems"
           title="Figma UI kits & brand assets."
@@ -33,3 +33,4 @@ export default function DesignsPage() {
     </div>
   );
 }
+

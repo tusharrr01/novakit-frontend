@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Github, Check } from 'lucide-react';
-import { AuthShell } from '@/src/components/site/auth-shell';
+import { AuthShell } from '@/src/components/layout/AuthShell';
 import { useAuthPage } from '@/src/lib/auth-content';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';

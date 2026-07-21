@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ShieldCheck } from 'lucide-react';
-import { OverviewTab } from '@/src/components/admin/overview-tab';
+import { OverviewTab } from '@/src/components/dashboard';
 
 export default function AdminPage() {
   const { data: session, status } = useSession();

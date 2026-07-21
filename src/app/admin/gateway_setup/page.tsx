@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PaymentsTab } from '@/src/components/admin/payments-tab';
+import { PaymentsTab } from '@/src/components/payment';
 
 export default function AdminGatewaySetupPage() {
   return <PaymentsTab />;

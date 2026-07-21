@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { ProductsTab } from '@/src/components/admin/products-tab';
+import { ProductsTab } from '@/src/components/template';
 
 export default function AdminTemplateManagementPage() {
-  return <ProductsTab sub="templates" />;
+  return <ProductsTab />;
 }
