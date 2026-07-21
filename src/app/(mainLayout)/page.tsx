@@ -19,9 +19,9 @@ import {
   Minus,
   Quote,
 } from 'lucide-react';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
-import { AnnouncementMarquee } from '@/src/components/layout/AnnouncementMarquee';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
+import { AnnouncementMarquee } from '@/src/layout/AnnouncementMarquee';
 import { useFaqs, useTestimonials } from '@/src/lib/site-content';
 import { useI18n } from '@/src/lib/i18n';
 import { useCurrency } from '@/src/lib/currency';

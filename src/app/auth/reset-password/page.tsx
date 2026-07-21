@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff, ArrowRight, Check } from 'lucide-react';
-import { AuthShell } from '@/src/components/layout/AuthShell';
+import { AuthShell } from '@/src/layout/AuthShell';
 import { useAuthPage } from '@/src/lib/auth-content';
 
 export default function ResetPasswordPage() {

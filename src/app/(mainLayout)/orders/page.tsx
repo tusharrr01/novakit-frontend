@@ -15,8 +15,8 @@ import {
   Ban,
   Filter,
 } from 'lucide-react';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 import { useAuth } from '@/src/lib/auth';
 import { useCurrency } from '@/src/lib/currency';
 import { ORDERS, ORDER_STATUSES, formatOrderDate, productFor, type OrderStatus } from '@/src/lib/orders';

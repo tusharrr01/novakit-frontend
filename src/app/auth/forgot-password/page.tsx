@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowRight, ArrowLeft } from 'lucide-react';
-import { AuthShell } from '@/src/components/layout/AuthShell';
+import { AuthShell } from '@/src/layout/AuthShell';
 import { useAuthPage } from '@/src/lib/auth-content';
 
 export default function ForgotPasswordPage() {

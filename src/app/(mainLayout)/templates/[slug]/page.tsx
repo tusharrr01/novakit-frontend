@@ -4,8 +4,8 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useGetTemplateBySlugQuery, useGetTemplatesQuery } from '@/src/redux/api/templateApi';
 import { TemplateDetail, TemplateNotFound } from '@/src/components/template/TemplateDetail';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 export default function TemplateDetailPage() {
   const { slug } = useParams();

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { faqStore, type Faq } from '@/src/lib/site-content';
 import { newFaqId } from '@/src/utils/faq';
+import { TextInput } from '@/src/components/shared/form-fields/TextInput';
+import { TextAreaField } from '@/src/components/shared/form-fields/TextAreaField';
 
 export function FaqForm({
   item,
@@ -40,7 +42,7 @@ export function FaqForm({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -57,13 +59,13 @@ export function FaqForm({
           <button
             type="button"
             onClick={onBack}
-            className="rounded-md border border-border bg-card px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+            className="rounded-md border border-border bg-card px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-md bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/20"
+            className="rounded-md bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-opacity hover:opacity-90"
           >
             {isEdit ? 'Save changes' : 'Create FAQ'}
           </button>
@@ -73,71 +75,66 @@ export function FaqForm({
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="admin-card p-6">
-            <h3 className="font-display text-sm font-semibold">Content</h3>
-            <div className="mt-4 space-y-4">
-              <label className="block text-sm">
-                <span className="mb-1 block text-xs font-medium text-muted-foreground">Question</span>
-                <input
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="e.g. Can I use NovaKit for client projects?"
-                  className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
-                />
-              </label>
-              <label className="block text-sm">
-                <span className="mb-1 block text-xs font-medium text-muted-foreground">Answer</span>
-                <textarea
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  rows={6}
-                  placeholder="Write a clear, concise answer…"
-                  className="w-full rounded-md border border-border bg-background p-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
-                />
-              </label>
+            <h3 className="font-display text-sm font-semibold mb-4">Content</h3>
+            <div className="space-y-4">
+              <TextInput
+                label="Question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="e.g. Can I use NovaKit for client projects?"
+              />
+              <TextAreaField
+                label="Answer"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                rows={6}
+                placeholder="Write a clear, concise answer…"
+              />
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="admin-card p-6">
-            <h3 className="font-display text-sm font-semibold">Organisation</h3>
-            <div className="mt-4 space-y-4">
-              <label className="block text-sm">
-                <span className="mb-1 block text-xs font-medium text-muted-foreground">Category</span>
-                <input
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Billing, Product, Licensing…"
-                  className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
-                />
-              </label>
-              <label className="block text-sm">
-                <span className="mb-1 block text-xs font-medium text-muted-foreground">Display order</span>
-                <input
-                  type="number"
-                  value={order}
-                  onChange={(e) => setOrder(Number(e.target.value))}
-                  min={1}
-                  className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
-                />
-              </label>
+            <h3 className="font-display text-sm font-semibold mb-4">Organisation</h3>
+            <div className="space-y-4">
+              <TextInput
+                label="Category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Billing, Product, Licensing…"
+              />
+              <TextInput
+                label="Display order"
+                type="number"
+                value={order}
+                onChange={(e) => setOrder(Number(e.target.value))}
+                min={1}
+              />
             </div>
           </div>
 
           <div className="admin-card p-6">
-            <h3 className="font-display text-sm font-semibold">Status</h3>
-            <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-md border border-border bg-background p-3">
-              <input
-                type="checkbox"
-                checked={published}
-                onChange={(e) => setPublished(e.target.checked)}
-                className="mt-0.5 h-4 w-4"
-              />
-              <span className="text-sm">
-                <span className="block font-medium">Published</span>
-                <span className="text-xs text-muted-foreground">Show this FAQ on the landing page.</span>
-              </span>
-            </label>
+            <h3 className="font-display text-sm font-semibold mb-4">Status</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Published</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Show this FAQ on the landing page</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPublished(!published)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none cursor-pointer ${
+                  published ? 'bg-indigo-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    published ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>

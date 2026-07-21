@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { useGetPageBySlugQuery } from '@/src/redux/api/pageApi';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 interface PublicPageProps {
   slug: string;

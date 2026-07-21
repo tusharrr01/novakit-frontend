@@ -4,8 +4,8 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useGetDesignBySlugQuery, useGetDesignsQuery } from '@/src/redux/api/designApi';
 import { DesignDetail, DesignNotFound } from '@/src/components/design/DesignDetail';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 export default function DesignDetailPage() {
   const { slug } = useParams();

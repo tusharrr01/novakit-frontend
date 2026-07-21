@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Github } from 'lucide-react';
-import { AuthShell } from '@/src/components/layout/AuthShell';
+import { AuthShell } from '@/src/layout/AuthShell';
 import { useAuthPage } from '@/src/lib/auth-content';
 
 function LoginForm() {

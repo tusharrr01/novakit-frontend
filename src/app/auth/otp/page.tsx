@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
-import { AuthShell } from '@/src/components/layout/AuthShell';
+import { AuthShell } from '@/src/layout/AuthShell';
 import { useAuthPage } from '@/src/lib/auth-content';
 
 const LEN = 6;

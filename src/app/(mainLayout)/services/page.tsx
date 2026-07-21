@@ -2,8 +2,8 @@
 
 import { ServiceList } from '@/src/components/service/ServiceList';
 import { useGetServicesQuery } from '@/src/redux/api/serviceApi';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 export default function ServicesPage() {
   const { data, isLoading } = useGetServicesQuery(undefined);

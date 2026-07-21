@@ -28,9 +28,9 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 
-import { ThemeToggle } from '@/src/components/layout/ThemeToggle';
-import { Logo } from '@/src/components/layout/Logo';
-import { LanguageSwitcher, CurrencySwitcher } from '@/src/components/layout/SiteHeader';
+import { ThemeToggle } from '@/src/layout/ThemeToggle';
+import { Logo } from '@/src/layout/Logo';
+import { LanguageSwitcher, CurrencySwitcher } from '@/src/layout/SiteHeader';
 import { NotificationsBell } from '@/src/components/admin/notifications-bell';
 import { getInitials } from '@/src/lib/auth';
 

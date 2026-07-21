@@ -2,8 +2,8 @@
 
 import { DesignList } from '@/src/components/design/DesignList';
 import { useGetDesignsQuery } from '@/src/redux/api/designApi';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 export default function DesignsPage() {
   const { data, isLoading } = useGetDesignsQuery(undefined);

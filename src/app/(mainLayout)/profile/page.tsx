@@ -37,8 +37,8 @@ import {
   User as UserIcon,
   Wallet,
 } from 'lucide-react';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 import { authStore, getInitials, useAuth } from '@/src/lib/auth';
 import { getPurchasesWithProduct, daysUntil, formatDate } from '@/src/lib/purchases';
 import {

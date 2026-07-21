@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { TextInput } from '@/src/components/shared/form-fields/TextInput';
+import { TextAreaField } from '@/src/components/shared/form-fields/TextAreaField';
 
 interface PageFormData {
   title: string;
@@ -140,61 +142,44 @@ export function PageForm({ initialData, onSubmit, isLoading, isEdit = false }: P
         {/* Left — Main content */}
         <div className="xl:col-span-8 space-y-5">
           {/* Title */}
-          <div className="admin-card p-6 space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                value={form.title}
-                onChange={handleTitleChange}
-                placeholder="e.g. Privacy Policy"
-                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-neutral-400"
-              />
-              {errors.title && (
-                <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
-                  <AlertCircle size={12} /> {errors.title}
-                </p>
-              )}
-            </div>
+          <div className="admin-card p-6">
+            <TextInput
+              label="Title"
+              value={form.title}
+              onChange={handleTitleChange}
+              placeholder="e.g. Privacy Policy"
+              error={errors.title}
+              required
+            />
           </div>
 
           {/* Content */}
           <div className="admin-card p-6">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2">
-              Content <span className="text-neutral-400 font-normal normal-case">(HTML supported)</span>
-            </label>
-            <textarea
+            <TextAreaField
+              label="Content (HTML supported)"
               value={form.content}
               onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
               rows={20}
               placeholder="<h2>Section Title</h2><p>Write your page content here…</p>"
-              className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 py-2.5 font-mono text-sm text-neutral-900 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-neutral-400 resize-y"
             />
           </div>
 
           {/* SEO */}
           <div className="admin-card p-6 space-y-4">
             <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">SEO Settings</h3>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Meta Title</label>
-              <input
-                value={form.meta_title}
-                onChange={(e) => setForm((prev) => ({ ...prev, meta_title: e.target.value }))}
-                placeholder="Leave blank to use page title"
-                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-neutral-400"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Meta Description</label>
-              <textarea
-                value={form.meta_description}
-                onChange={(e) => setForm((prev) => ({ ...prev, meta_description: e.target.value }))}
-                rows={3}
-                placeholder="Brief summary for search engines (160 chars recommended)"
-                className="w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-neutral-400 resize-y"
-              />
-            </div>
+            <TextInput
+              label="Meta Title"
+              value={form.meta_title}
+              onChange={(e) => setForm((prev) => ({ ...prev, meta_title: e.target.value }))}
+              placeholder="Leave blank to use page title"
+            />
+            <TextAreaField
+              label="Meta Description"
+              value={form.meta_description}
+              onChange={(e) => setForm((prev) => ({ ...prev, meta_description: e.target.value }))}
+              rows={3}
+              placeholder="Brief summary for search engines (160 chars recommended)"
+            />
           </div>
         </div>
 
@@ -215,8 +200,8 @@ export function PageForm({ initialData, onSubmit, isLoading, isEdit = false }: P
               />
             </div>
             {errors.slug ? (
-              <p className="flex items-center gap-1 text-xs text-red-500">
-                <AlertCircle size={12} /> {errors.slug}
+              <p className="text-xs text-red-500 mt-1">
+                {errors.slug}
               </p>
             ) : (
               <p className="text-xs text-neutral-400">

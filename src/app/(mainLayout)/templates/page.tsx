@@ -2,8 +2,8 @@
 
 import { TemplateList } from '@/src/components/template/TemplateList';
 import { useGetTemplatesQuery } from '@/src/redux/api/templateApi';
-import { SiteHeader } from '@/src/components/layout/SiteHeader';
-import { SiteFooter } from '@/src/components/layout/SiteFooter';
+import { SiteHeader } from '@/src/layout/SiteHeader';
+import { SiteFooter } from '@/src/layout/SiteFooter';
 
 export default function TemplatesPage() {
   const { data, isLoading } = useGetTemplatesQuery(undefined);
