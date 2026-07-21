@@ -204,8 +204,8 @@ export function DataTable<T>({
 
   if (data.length === 0 && !isLoading) {
     return (
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-12 sm:p-20 text-center rounded-xl shadow-sm">
-        <p className="text-neutral-500 dark:text-neutral-400">
+      <div className="bg-card/70 border border-border/80 p-12 sm:p-20 text-center rounded-xl shadow-sm">
+        <p className="text-muted-foreground">
           {searchTerm
             ? `No results match your search: "${searchTerm}"`
             : isFilterActive
@@ -220,19 +220,16 @@ export function DataTable<T>({
   const showActionsColumn = !!onDelete || !!renderActions;
 
   return (
-    <div className={cn('bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden transition-all', tableClassName)}>
-      <div className="overflow-x-auto custom-scrollbar">
-        <table className="w-full">
-          <thead className="bg-neutral-50 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-800">
+    <div className={cn('bg-card/70 border border-border/80 rounded-xl shadow-sm overflow-hidden transition-all', tableClassName)}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead className="bg-card/90 border-b border-border/80 sticky top-0 z-10 backdrop-blur-md">
             <tr>
               {hasDeleteActions && (
                 <th className={cn('w-12 px-6 py-4 text-center', selectionClassName)}>
-                  <input
-                    type="checkbox"
-                    className="relative w-4 h-4 rounded border-neutral-300 dark:border-neutral-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
-                    checked={allSelected}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    ref={headerCheckboxRef}
+                  <Checkbox
+                    checked={allSelected ? true : isIndeterminate ? 'indeterminate' : false}
+                    onCheckedChange={(checked) => handleSelectAll(checked === true)}
                   />
                 </th>
               )}
@@ -242,10 +239,10 @@ export function DataTable<T>({
                   <th
                     key={index}
                     className={cn(
-                      'px-6 py-4 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400 capitalize tracking-wider',
+                      'px-6 py-4 text-left text-xs font-semibold text-muted-foreground tracking-wider uppercase',
                       column.className,
                       columnClassNames[index],
-                      column.sortable && 'cursor-pointer select-none hover:text-neutral-950 dark:hover:text-white'
+                      column.sortable && 'cursor-pointer select-none hover:text-foreground'
                     )}
                     onClick={() => column.sortable && handleSort(key)}
                   >
@@ -257,13 +254,13 @@ export function DataTable<T>({
                 );
               })}
               {showActionsColumn && (
-                <th className={cn('px-6 py-4 text-right text-xs font-semibold text-neutral-600 dark:text-neutral-400 capitalize tracking-wider', actionClassName)}>
+                <th className={cn('px-6 py-4 text-left text-xs font-semibold text-muted-foreground tracking-wider uppercase', actionClassName)}>
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+          <tbody className="divide-y divide-border/60">
             {isLoading && data.length === 0
               ? Array.from({ length: limit }).map((_, rowIndex) => (
                   <tr key={`skeleton-row-${rowIndex}`} className="animate-pulse">
@@ -291,8 +288,8 @@ export function DataTable<T>({
                     <tr
                       key={rowIndex}
                       className={cn(
-                        'hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 transition-colors',
-                        isRowSelected && 'bg-indigo-50/30 dark:bg-indigo-950/10'
+                        'hover:bg-accent/40 transition-colors',
+                        isRowSelected && 'bg-brand/10 text-foreground'
                       )}
                     >
                       {hasDeleteActions && (
@@ -319,14 +316,14 @@ export function DataTable<T>({
                             : '';
 
                         return (
-                          <td key={colIndex} className={cn('px-6 py-4 text-sm font-medium text-neutral-900 dark:text-neutral-100 group/row', column.className, columnClassNames[colIndex])}>
+                          <td key={colIndex} className={cn('px-6 py-4 text-sm font-medium text-foreground group/row', column.className, columnClassNames[colIndex])}>
                             <div className="flex items-center gap-2 max-w-xs sm:max-w-md">
                               <div className="truncate">{cellVal}</div>
                               {column.copyable && (
                                 <button
                                   type="button"
                                   onClick={(e) => handleCopy(e, copyVal)}
-                                  className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition-colors text-neutral-400 hover:text-neutral-900 dark:hover:text-white opacity-0 group-hover/row:opacity-100 shrink-0"
+                                  className="p-1 hover:bg-accent rounded transition-colors text-muted-foreground hover:text-foreground opacity-0 group-hover/row:opacity-100 shrink-0"
                                   title="Copy to clipboard"
                                 >
                                   <Copy size={12} />
@@ -337,14 +334,14 @@ export function DataTable<T>({
                         );
                       })}
                       {showActionsColumn && (
-                        <td className={cn('px-6 py-4 text-right', actionClassName)}>
-                          <div className="flex items-center justify-end gap-2">
+                        <td className={cn('px-6 py-4 text-left', actionClassName)}>
+                          <div className="flex items-center justify-start gap-1">
                             {renderActions && renderActions(row)}
                             {onDelete && (
                               <button
                                 type="button"
                                 onClick={() => handleDeleteClick(rowId)}
-                                className="p-1.5 border-none text-red-600 hover:text-red-700 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/15 transition-all cursor-pointer"
                                 disabled={isLoading}
                                 title="Delete"
                               >

@@ -48,10 +48,10 @@ export function Pagination({
   };
 
   return (
-    <div className={cn('flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 flex-wrap', className)}>
+    <div className={cn('flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 flex-wrap border-t border-border/80 bg-card/70 backdrop-blur-md', className)}>
       <div className="flex items-center gap-6 flex-wrap">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
             Rows per page
           </span>
           <Select
@@ -59,15 +59,15 @@ export function Pagination({
             onValueChange={(value) => onLimitChange(Number(value))}
             disabled={isLoading}
           >
-            <SelectTrigger className="w-18 h-9 text-sm rounded-lg bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 shadow-sm focus:ring-indigo-500/10">
+            <SelectTrigger className="w-20 h-9 text-xs font-medium rounded-xl bg-background border-border focus:ring-2 focus:ring-brand/20">
               <SelectValue placeholder={limit.toString()} />
             </SelectTrigger>
-            <SelectContent align="start" className="min-w-20 rounded-lg shadow-xl dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
+            <SelectContent align="start" className="min-w-20 rounded-xl shadow-xl bg-card border-border">
               {limitOptions.map((option) => (
                 <SelectItem
                   key={option}
                   value={option.toString()}
-                  className="rounded-lg cursor-pointer focus:bg-indigo-50 dark:focus:bg-neutral-800 focus:text-indigo-600 dark:focus:text-white"
+                  className="rounded-lg cursor-pointer focus:bg-brand/10 focus:text-brand text-xs"
                 >
                   {option}
                 </SelectItem>
@@ -75,9 +75,9 @@ export function Pagination({
             </SelectContent>
           </Select>
         </div>
-        <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-800 hidden sm:block" />
-        <div className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-          Showing <span className="text-neutral-950 dark:text-white">{startEntry}</span> to <span className="text-neutral-950 dark:text-white">{endEntry}</span> of <span className="text-neutral-950 dark:text-white">{totalCount}</span> results
+        <div className="h-4 w-px bg-border hidden sm:block" />
+        <div className="text-xs font-medium text-muted-foreground">
+          Showing <span className="text-foreground font-semibold">{startEntry}</span> to <span className="text-foreground font-semibold">{endEntry}</span> of <span className="text-foreground font-semibold">{totalCount}</span> results
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1 || isLoading}
-          className="h-9 w-9 p-0 rounded-lg bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-250 disabled:opacity-50"
+          className="h-9 w-9 p-0 rounded-xl bg-background border-border hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -95,21 +95,21 @@ export function Pagination({
         <div className="flex items-center gap-1.5">
           {getPageNumbers().map((p, index) =>
             p === '...' ? (
-              <div key={index} className="w-9 h-9 flex items-center justify-center text-neutral-400">
+              <div key={index} className="w-9 h-9 flex items-center justify-center text-xs text-muted-foreground">
                 ...
               </div>
             ) : (
               <Button
                 key={index}
-                variant={page === p ? 'outline' : 'ghost'}
+                variant={page === p ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => onPageChange(Number(p))}
                 disabled={isLoading}
                 className={cn(
-                  'h-9 w-9 p-0 rounded-lg text-sm font-medium transition-all',
+                  'h-9 w-9 p-0 rounded-xl text-xs font-medium transition-all',
                   page === p
-                    ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border-indigo-500 dark:border-indigo-500/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
-                    : 'bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-brand-gradient text-white border-0 shadow-md shadow-brand/20 font-bold'
+                    : 'bg-background border-border text-muted-foreground hover:bg-accent hover:text-foreground'
                 )}
               >
                 {p}
@@ -123,7 +123,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages || isLoading}
-          className="h-9 w-9 p-0 rounded-lg bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-250 disabled:opacity-50"
+          className="h-9 w-9 p-0 rounded-xl bg-background border-border hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-40"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

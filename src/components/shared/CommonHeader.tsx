@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, ListFilter, Plus, RefreshCw, Download, Settings2, Trash2 } from 'lucide-react';
+import { Search, ListFilter, Plus, RefreshCw, Download, Settings2, Trash2, ChevronLeft, X } from 'lucide-react';
 import { Button } from '@/src/elements/ui/button';
 import { Input } from '@/src/elements/ui/input';
 import {
@@ -16,6 +16,7 @@ import {
 export interface CommonHeaderProps {
   title: string;
   description?: string;
+  onBack?: () => void;
   onSearch?: (value: string) => void;
   searchTerm?: string;
   searchPlaceholder?: string;
@@ -35,6 +36,7 @@ export interface CommonHeaderProps {
 export function CommonHeader({
   title,
   description,
+  onBack,
   onSearch,
   searchTerm = '',
   searchPlaceholder = 'Search...',
@@ -51,13 +53,24 @@ export function CommonHeader({
   searchActions,
 }: CommonHeaderProps) {
   return (
-    <div className="space-y-6 pt-0 mb-5 sm:mb-2 py-4 transition-all">
+    <div className="sticky -top-4 lg:-top-6 -mt-4 lg:-mt-6 -mx-4 lg:-mx-6 px-4 lg:px-6 pt-4 lg:pt-6 pb-2 z-20 bg-background space-y-3 transition-all">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight mb-1">
-            {title}
-          </h1>
-          {description && <p className="text-neutral-500 dark:text-neutral-400 text-sm">{description}</p>}
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground transition-all cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold font-display text-foreground tracking-tight">
+              {title}
+            </h1>
+            {description && <p className="text-muted-foreground text-sm mt-0.5">{description}</p>}
+          </div>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap justify-end">
@@ -65,9 +78,9 @@ export function CommonHeader({
           {onAddClick && (
             <Button
               onClick={onAddClick}
-              className="flex items-center cursor-pointer gap-2 justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg shadow-sm transition-all active:scale-95 font-semibold text-sm"
+              className="flex items-center cursor-pointer gap-2 justify-center bg-brand-gradient text-white h-11 px-5 rounded-lg font-semibold text-sm shadow-md shadow-brand/25 transition-all hover:opacity-95 active:scale-95"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 stroke-[2.5]" />
               {addLabel}
             </Button>
           )}
@@ -75,19 +88,29 @@ export function CommonHeader({
       </div>
 
       {(onSearch || onFilter || onExport || onRefresh) && (
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center gap-4 flex-wrap">
+        <div className="bg-card/70 border border-border/80 p-4 rounded-xl shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center gap-4 flex-wrap backdrop-blur-xl">
           {onSearch && (
             <div className="flex-1 flex flex-col md:flex-row gap-4 items-stretch md:items-center">
               <div className="relative flex-1">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 pointer-events-none">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
                   <Search className="w-4 h-4" />
                 </div>
                 <Input
                   placeholder={searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => onSearch(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-0 rounded-lg text-sm w-full"
+                  className="pl-10 pr-10 py-2 bg-background border-border focus:border-brand/60 focus:ring-2 focus:ring-brand/20 rounded-xl text-sm w-full"
                 />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => onSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer flex items-center justify-center p-1.5 hover:bg-accent rounded-full transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
               {searchActions}
             </div>
@@ -97,7 +120,7 @@ export function CommonHeader({
               <Button
                 variant="outline"
                 onClick={onFilter}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 transition-all text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border-border hover:bg-accent text-foreground transition-all text-sm font-medium"
                 disabled={isLoading}
               >
                 <ListFilter className="w-4 h-4" />

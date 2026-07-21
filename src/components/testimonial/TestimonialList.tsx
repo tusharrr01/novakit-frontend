@@ -155,7 +155,7 @@ export function TestimonialList({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
+      <div className="pt-2">
         <DataTable
           data={filtered}
           columns={columns}
@@ -163,7 +163,8 @@ export function TestimonialList({
           renderActions={(row) => (
             <button
               onClick={() => onEdit(row)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all cursor-pointer"
+              title="Edit testimonial"
             >
               <Pencil className="h-4 w-4" />
             </button>

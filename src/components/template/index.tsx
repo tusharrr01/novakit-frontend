@@ -566,7 +566,7 @@ export function ProductsTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
+      <div className="pt-2">
         {/* Grid */}
         {sub === 'templates' && (
           <Grid

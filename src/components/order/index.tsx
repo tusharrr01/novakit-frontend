@@ -91,9 +91,9 @@ export function OrdersTab() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="shrink-0">
+      <div className="sticky -top-4 lg:-top-6 -mt-4 lg:-mt-6 -mx-4 lg:-mx-6 px-4 lg:px-6 pt-4 lg:pt-6 pb-4 z-20 bg-background border-b border-border/60 space-y-4 transition-all">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -169,8 +169,7 @@ export function OrdersTab() {
       </div>
 
       {/* Table */}
-      <div className="mt-5 min-h-0 flex-1 overflow-hidden rounded-lg border border-border/70 bg-card">
-        <div className="h-full overflow-auto custom-scrollbar">
+      <div className="mt-5 border border-border/70 bg-card rounded-2xl">
         <DataTable
           data={filtered}
           columns={[
@@ -245,7 +244,6 @@ export function OrdersTab() {
           pagination={false}
           getRowId={(row) => row.id}
         />
-        </div>
       </div>
     </div>
   );
@@ -256,7 +254,7 @@ function OrderDetailPanel({ order, onBack }: { order: Order; onBack: () => void 
   const [status, setStatus] = useState<OrderStatus>(order.status);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="space-y-6">
       <div className="shrink-0">
         <button
           type="button"
@@ -295,7 +293,7 @@ function OrderDetailPanel({ order, onBack }: { order: Order; onBack: () => void 
         </div>
       </div>
 
-      <div className="mt-6 min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
+      <div className="mt-6">
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Left column */}
           <div className="space-y-4 lg:col-span-2">

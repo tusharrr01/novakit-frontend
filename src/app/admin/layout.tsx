@@ -141,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-background text-foreground">
       {/* Sidebar navigation panel */}
       <aside
         className={`flex flex-col border-r border-border/60 bg-card/60 backdrop-blur-xl transition-all duration-300 ${
@@ -247,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main dashboard content container */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 bg-card/45 px-4 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-xl shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen((o) => !o)}
@@ -272,7 +272,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Dynamic content rendering frame */}
-        <div className="flex-1 min-h-0 pl-4 pt-4 pb-4 pr-0 lg:pl-6 lg:pt-6 lg:pb-6 lg:pr-0 overflow-hidden admin-page-content-area">
+        <div className="flex-1 min-h-0 p-4 lg:p-6 overflow-y-auto admin-page-content-area">
           {children}
         </div>
       </main>

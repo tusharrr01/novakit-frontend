@@ -34,6 +34,18 @@ import {
   Download,
 } from 'lucide-react';
 import { DataTable, ColumnDef } from '@/src/components/shared/DataTable';
+import { CommonHeader } from '@/src/components/shared/CommonHeader';
+import { ConfirmModal } from '@/src/components/shared/ConfirmModal';
+import { FilterSelect, SelectDropdown } from '@/src/components/shared/SelectDropdown';
+import { useDebounce } from '@/src/hooks/useDebounce';
+import {
+  useGetUsersQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useBulkDeleteUsersMutation,
+} from '@/src/redux/api/userApi';
+import { toast } from 'sonner';
 
 type User = {
   id: string;
@@ -146,44 +158,12 @@ function SortableTh({
   );
 }
 
-function FilterSelect({
-  label,
-  value,
-  options,
-  onChange,
-  icon,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (v: string) => void;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <label className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-xs">
-      {icon}
-      <span className="text-muted-foreground">{label}:</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="bg-transparent text-xs font-medium outline-none"
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
 export function UsersTab() {
   const [view, setView] = useState<'list' | 'add' | 'edit'>('list');
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(usersSeed);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 500);
   const [role, setRole] = useState<'All' | User['role']>('All');
   const [plan, setPlan] = useState<'All' | User['plan']>('All');
   const [status, setStatus] = useState<'All' | User['status']>('All');
@@ -191,30 +171,51 @@ export function UsersTab() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [infoUser, setInfoUser] = useState<User | null>(null);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return users.filter((u) => {
-      if (role !== 'All' && u.role !== role) return false;
-      if (plan !== 'All' && u.plan !== plan) return false;
-      if (status !== 'All' && u.status !== status) return false;
-      if (q && !`${u.name} ${u.email} ${u.country}`.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [query, role, plan, status, users]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    arr.sort((a, b) => {
-      const av = a[sortKey];
-      const bv = b[sortKey];
-      let cmp = 0;
-      if (typeof av === 'number' && typeof bv === 'number') cmp = av - bv;
-      else cmp = String(av).localeCompare(String(bv));
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-    return arr;
-  }, [filtered, sortKey, sortDir]);
+  const { data: usersResponse, isLoading, isFetching } = useGetUsersQuery({
+    page,
+    limit,
+    search: debouncedQuery || undefined,
+    role: role !== 'All' ? role : undefined,
+    status: status !== 'All' ? status : undefined,
+    plan: plan !== 'All' ? plan : undefined,
+    sort_by: sortKey === 'joined' ? 'created_at' : sortKey,
+    sort_order: sortDir,
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, plan]);
+
+  const [deleteUserApi] = useDeleteUserMutation();
+  const [bulkDeleteUsersApi, { isLoading: isBulkDeleting }] = useBulkDeleteUsersMutation();
+
+  const users: User[] = useMemo(() => {
+    const rawList = usersResponse?.data?.users || [];
+    return rawList.map((u: any) => ({
+      id: u.id || u._id,
+      name: u.name || 'Unnamed',
+      email: u.email || '',
+      role: u.role || 'Customer',
+      plan: u.plan || 'Free',
+      status: u.status || 'Active',
+      spend: u.spend || 0,
+      orders: u.orders || 0,
+      joined: u.joined || new Date().toISOString(),
+      lastActive: u.lastActive || new Date().toISOString(),
+      country: u.country || 'US',
+    }));
+  }, [usersResponse]);
+
+  const totalUsers = usersResponse?.data?.total || users.length;
+  const totalPages = usersResponse?.data?.totalPages || 1;
+
+  const filtered = users;
+  const sorted = users;
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -224,27 +225,32 @@ export function UsersTab() {
     }
   }
 
-  function toggleSelect(id: string) {
-    setSelected((s) => {
-      const next = new Set(s);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-  const allSelected = sorted.length > 0 && sorted.every((u) => selected.has(u.id));
-  function toggleSelectAll() {
-    setSelected((s) => {
-      if (allSelected) {
+  const handleDeleteUser = async () => {
+    if (!deleteUserId) return;
+    try {
+      await deleteUserApi(deleteUserId).unwrap();
+      toast.success('User deleted successfully');
+      setSelected((s) => {
         const next = new Set(s);
-        sorted.forEach((u) => next.delete(u.id));
+        next.delete(deleteUserId);
         return next;
-      }
-      const next = new Set(s);
-      sorted.forEach((u) => next.add(u.id));
-      return next;
-    });
-  }
+      });
+      setDeleteUserId(null);
+    } catch (err: any) {
+      toast.error(err?.data?.message || 'Failed to delete user');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    try {
+      await bulkDeleteUsersApi(Array.from(selected)).unwrap();
+      toast.success(`${selected.size} users deleted successfully`);
+      setSelected(new Set());
+    } catch (err: any) {
+      toast.error(err?.data?.message || 'Failed to delete selected users');
+    }
+  };
 
   const totalSpend = sorted.reduce((s, u) => s + u.spend, 0);
 
@@ -261,84 +267,47 @@ export function UsersTab() {
     );
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="shrink-0 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display text-2xl font-semibold">Users</h2>
-            <p className="text-sm text-muted-foreground">
-              {sorted.length} of {users.length} shown · ${totalSpend.toLocaleString()} lifetime spend
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setView('add')}
-              className="inline-flex items-center gap-2 rounded-md bg-brand-gradient px-4 py-2 text-sm font-medium text-white shadow-lg shadow-brand/20"
-            >
-              <Plus className="h-4 w-4" /> Add user
-            </button>
-          </div>
-        </div>
-
-        {/* Filters bar */}
-        <div className="flex flex-wrap items-center gap-2 admin-card-static p-3">
-          <div className="relative min-w-[220px] flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search name, email or country…"
-              className="h-9 w-full rounded-md border border-border bg-background pl-9 pr-4 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
+    <div className="space-y-6">
+      <CommonHeader
+        title="Users"
+        description={`${sorted.length} of ${totalUsers} shown · $${totalSpend.toLocaleString()} lifetime spend`}
+        onSearch={(v) => {
+          setQuery(v);
+          setPage(1);
+        }}
+        searchTerm={query}
+        searchPlaceholder="Search name, email or country…"
+        onAddClick={() => setView('add')}
+        addLabel="Add user"
+        selectedCount={selected.size}
+        onBulkDelete={() => setShowBulkDeleteModal(true)}
+        bulkActionLoading={isBulkDeleting}
+        isLoading={isLoading || isFetching}
+        searchActions={
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterSelect
+              icon={<Filter className="h-3.5 w-3.5" />}
+              label="Plan"
+              value={plan}
+              options={['All', 'Free', 'Pro', 'Studio']}
+              onChange={(v) => setPlan(v as typeof plan)}
             />
-          </div>
-          <FilterSelect
-            icon={<Filter className="h-3.5 w-3.5" />}
-            label="Role"
-            value={role}
-            options={['All', 'Customer', 'Author', 'Admin']}
-            onChange={(v) => setRole(v as typeof role)}
-          />
-          <FilterSelect
-            label="Plan"
-            value={plan}
-            options={['All', 'Free', 'Pro', 'Studio']}
-            onChange={(v) => setPlan(v as typeof plan)}
-          />
-          <FilterSelect
-            label="Status"
-            value={status}
-            options={['All', 'Active', 'Invited', 'Suspended']}
-            onChange={(v) => setStatus(v as typeof status)}
-          />
-          {(query || role !== 'All' || plan !== 'All' || status !== 'All') && (
-            <button
-              onClick={() => {
-                setQuery('');
-                setRole('All');
-                setPlan('All');
-                setStatus('All');
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Reset
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
-        {selected.size > 0 && (
-          <div className="flex items-center justify-between rounded-lg border border-brand/30 bg-brand/5 p-3 text-sm mb-4">
-            <span>{selected.size} selected</span>
-            <div className="flex items-center gap-2">
-              <button className="rounded-md border border-border bg-card px-3 py-1 text-xs">Email</button>
-              <button className="rounded-md border border-border bg-card px-3 py-1 text-xs">Suspend</button>
-              <button className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1 text-xs text-destructive">
-                Delete
+            {plan !== 'All' && (
+              <button
+                onClick={() => {
+                  setPlan('All');
+                  setPage(1);
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1"
+              >
+                Clear filter
               </button>
-            </div>
+            )}
           </div>
-        )}
+        }
+      />
+
+      <div className="pt-2">
 
         {/* Table */}
         <DataTable
@@ -388,12 +357,12 @@ export function UsersTab() {
           onSelectionChange={(ids) => setSelected(new Set(ids))}
           onSortChange={(sortBy) => toggleSort(sortBy as any)}
           renderActions={(row) => (
-            <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center justify-start gap-1">
               <button
                 type="button"
                 onClick={() => setInfoUser(row)}
                 title="View details"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-brand hover:bg-brand/10 transition-all cursor-pointer"
               >
                 <Info className="h-4 w-4" />
               </button>
@@ -404,7 +373,7 @@ export function UsersTab() {
                   setView('edit');
                 }}
                 title="Edit user"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all cursor-pointer"
               >
                 <Pencil className="h-4 w-4" />
               </button>
@@ -412,31 +381,51 @@ export function UsersTab() {
                 type="button"
                 onClick={() => setDeleteUserId(row.id)}
                 title="Delete user"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/15 transition-all cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
           )}
-          pagination={false}
+          pagination={true}
+          page={page}
+          totalPages={totalPages}
+          total={totalUsers}
+          limit={limit}
+          onPageChange={(p) => setPage(p)}
+          onLimitChange={(l) => {
+            setLimit(l);
+            setPage(1);
+          }}
+          isLoading={isLoading || isFetching}
           getRowId={(row) => row.id}
         />
       </div>
 
       {infoUser && <UserInfoModal user={infoUser} onClose={() => setInfoUser(null)} />}
       {deleteUserId && (
-        <ConfirmDeleteModal
+        <ConfirmModal
+          isOpen={!!deleteUserId}
           title="Delete user?"
-          description="This action cannot be undone. The user will be permanently removed from the system."
-          onCancel={() => setDeleteUserId(null)}
-          onConfirm={() => {
-            setUsers((prev) => prev.filter((u) => u.id !== deleteUserId));
-            setSelected((s) => {
-              const next = new Set(s);
-              next.delete(deleteUserId);
-              return next;
-            });
-            setDeleteUserId(null);
+          subtitle="This action cannot be undone. The user will be permanently removed from the system."
+          confirmText="Delete"
+          variant="danger"
+          onClose={() => setDeleteUserId(null)}
+          onConfirm={handleDeleteUser}
+        />
+      )}
+      {showBulkDeleteModal && (
+        <ConfirmModal
+          isOpen={showBulkDeleteModal}
+          title={`Delete ${selected.size} selected user(s)?`}
+          subtitle="This action cannot be undone. Selected users will be permanently removed from the system."
+          confirmText="Delete"
+          variant="danger"
+          isLoading={isBulkDeleting}
+          onClose={() => setShowBulkDeleteModal(false)}
+          onConfirm={async () => {
+            await handleBulkDelete();
+            setShowBulkDeleteModal(false);
           }}
         />
       )}
@@ -464,13 +453,50 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
     notes: '',
   });
 
+  const [createUserApi, { isLoading: isCreating }] = useCreateUserMutation();
+  const [updateUserApi, { isLoading: isUpdating }] = useUpdateUserMutation();
+
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    onBack();
+    const fullName = `${form.firstName} ${form.lastName}`.trim();
+    if (!fullName || !form.email) {
+      toast.error('Name and email are required');
+      return;
+    }
+
+    try {
+      if (isEdit && user) {
+        await updateUserApi({
+          id: user.id,
+          name: fullName,
+          email: form.email,
+          role: form.role,
+          plan: form.plan,
+          status: form.status,
+          country: form.country,
+          password: form.password || undefined,
+        }).unwrap();
+        toast.success('User updated successfully');
+      } else {
+        await createUserApi({
+          name: fullName,
+          email: form.email,
+          role: form.role,
+          plan: form.plan,
+          status: form.status,
+          country: form.country,
+          password: form.password || '123456789',
+        }).unwrap();
+        toast.success('User created successfully');
+      }
+      onBack();
+    } catch (err: any) {
+      toast.error(err?.data?.message || 'Operation failed');
+    }
   }
 
   const initials =
@@ -478,44 +504,35 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <h2 className="font-display text-2xl font-semibold">
-              {isEdit ? `Edit ${user!.name}` : 'Add new user'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isEdit
-                ? locked
-                  ? 'This user has accepted their invite — only role and internal notes can be changed.'
-                  : 'Update this invited user\'s details, role, plan or status.'
-                : 'Create an account, assign a role and plan, and optionally send an invite email.'}
-            </p>
+      <CommonHeader
+        title={isEdit ? `Edit ${user!.name}` : 'Add new user'}
+        description={
+          isEdit
+            ? locked
+              ? 'This user has accepted their invite — only role and internal notes can be changed.'
+              : "Update this invited user's details, role, plan or status."
+            : 'Create an account, assign a role and plan, and optionally send an invite email.'
+        }
+        onBack={onBack}
+        extraActions={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-md border border-border bg-card px-4 py-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isCreating || isUpdating}
+              className="inline-flex items-center gap-2 rounded-md bg-brand-gradient px-5 py-2 text-sm font-medium text-white shadow-lg shadow-brand/20 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" /> {isEdit ? 'Save changes' : 'Create user'}
+            </button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onBack}
-            className="rounded-md border border-border bg-card px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-md bg-brand-gradient px-5 py-2 text-sm font-medium text-white shadow-lg shadow-brand/20"
-          >
-            <Plus className="h-4 w-4" /> {isEdit ? 'Save changes' : 'Create user'}
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -1057,59 +1074,5 @@ function TimelineItem({ tone, title, time }: { tone: string; title: string; time
       <div className="text-sm font-medium">{title}</div>
       <div className="text-[11px] text-muted-foreground">{time}</div>
     </li>
-  );
-}
-
-function ConfirmDeleteModal({
-  title,
-  description,
-  onConfirm,
-  onCancel,
-  confirmLabel = 'Delete',
-}: {
-  title: string;
-  description: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  confirmLabel?: string;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
-      onClick={onCancel}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md overflow-hidden rounded-lg border border-border bg-card shadow-2xl"
-      >
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-6 w-6" />
-            </span>
-            <div>
-              <h3 className="font-display text-lg font-semibold">{title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-            </div>
-          </div>
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white hover:bg-destructive/90"
-            >
-              {confirmLabel}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
