@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 export type AuthUser = {
   email: string;
@@ -65,14 +66,30 @@ export const authStore = {
 };
 
 export function useAuth() {
-  // Start as null (matches SSR) then hydrate after mount to avoid mismatches.
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setUser(readRaw());
+    if (status === 'loading') return;
+
+    if (session?.user) {
+      setUser({
+        name: session.user.name || 'NovaKit User',
+        email: session.user.email || '',
+        plan: (session.user as any).plan || (session.user as any).role === 'Admin' ? 'Studio' : 'Pro',
+        joinedAt: new Date().toISOString(),
+      });
+    } else {
+      setUser(readRaw());
+    }
     setHydrated(true);
-    const onChange = () => setUser(readRaw());
+
+    const onChange = () => {
+      if (!session?.user) {
+        setUser(readRaw());
+      }
+    };
     listeners.add(onChange);
     window.addEventListener(EVENT, onChange);
     window.addEventListener('storage', onChange);
@@ -81,9 +98,15 @@ export function useAuth() {
       window.removeEventListener(EVENT, onChange);
       window.removeEventListener('storage', onChange);
     };
-  }, []);
+  }, [session, status]);
 
-  return { user, isAuthenticated: !!user, hydrated };
+  const isAuthenticated = status === 'authenticated' || (status === 'unauthenticated' && !!user);
+
+  return {
+    user,
+    isAuthenticated: hydrated ? isAuthenticated : false,
+    hydrated,
+  };
 }
 
 export function getInitials(name: string) {

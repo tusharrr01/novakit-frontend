@@ -21,6 +21,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { authStore, getInitials, useAuth } from '@/src/lib/auth';
 import { i18nStore, useI18n } from '@/src/lib/i18n';
 import { currencyStore, useCurrency } from '@/src/lib/currency';
+import { signOut as nextAuthSignOut } from 'next-auth/react';
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -231,10 +232,10 @@ function UserMenu({ name, email, plan }: { name: string; email: string; plan: st
           </div>
           <div className="border-t border-border/60 p-1">
             <button
-              onClick={() => {
+              onClick={async () => {
                 authStore.signOut();
                 setOpen(false);
-                router.push('/');
+                await nextAuthSignOut({ callbackUrl: '/' });
               }}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 transition hover:bg-red-500/10"
             >
