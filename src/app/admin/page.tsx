@@ -86,6 +86,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState<TabKey>('overview');
   const [productSub, setProductSub] = useState<'templates' | 'designs' | 'services'>('templates');
   const [planSub, setPlanSub] = useState<'management' | 'customers'>('management');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Route protection checks
   useEffect(() => {
@@ -263,29 +264,38 @@ export default function AdminPage() {
         </div>
 
         {/* User context footer */}
-        <div className="p-4 border-t border-border/60 flex flex-col gap-2">
-          {sidebarOpen && (
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white shadow">
+        <div className="p-4 border-t border-border/60">
+          <div className="flex items-center justify-between gap-3 w-full">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white shadow shrink-0">
                 {getInitials(userName)}
               </span>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-xs font-semibold">{userName}</div>
-                <div className="truncate text-[10px] text-muted-foreground">{userEmail}</div>
-              </div>
+              {sidebarOpen && (
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-semibold">{userName}</div>
+                  <div className="truncate text-[10px] text-muted-foreground">{userEmail}</div>
+                </div>
+              )}
             </div>
+            {sidebarOpen && (
+              <button
+                onClick={() => setShowLogoutConfirm(true)}
+                title="Log out"
+                className="p-1.5 rounded-md text-rose-500 hover:bg-rose-500/10 transition shrink-0"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {!sidebarOpen && (
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              title="Log out"
+              className="p-1.5 mt-2 rounded-md text-rose-500 hover:bg-rose-500/10 transition shrink-0 w-full flex justify-center"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           )}
-          <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to log out?')) {
-                signOut({ callbackUrl: '/auth/login' });
-              }
-            }}
-            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-xs transition text-rose-500 hover:bg-rose-500/10`}
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            {sidebarOpen && <span>Super Admin</span>}
-          </button>
         </div>
       </aside>
 
@@ -343,6 +353,34 @@ export default function AdminPage() {
           {tab === 'syspref' && <SystemPreferencesTab />}
         </div>
       </main>
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300">
+          <div className="w-full max-w-md scale-95 transform rounded-2xl border border-border/85 bg-card p-6 shadow-2xl transition-all dark:bg-zinc-900">
+            <h3 className="text-lg font-bold tracking-tight text-foreground">Confirm Logout</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Are you sure you want to log out of the administrator control panel? Any unsaved edits will be discarded.
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  signOut({ callbackUrl: '/auth/login' });
+                }}
+                className="rounded-lg bg-rose-600 hover:bg-rose-700 px-4 py-2 text-xs font-semibold text-white shadow-md hover:shadow-rose-600/20 transition"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
