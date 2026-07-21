@@ -33,7 +33,7 @@ export default function RootLayout({
       suppressHydrationWarning // Prevents class mismatch warnings during hydration when changing themes
       className={`${spaceGrotesk.variable} ${dmSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextAuthProvider>
           <ReduxProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
