@@ -517,13 +517,6 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
         extraActions={
           <div className="flex items-center gap-2">
             <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-card h-11 px-5 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
               type="submit"
               disabled={isCreating || isUpdating}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-gradient text-white h-11 px-5 text-sm font-semibold shadow-md shadow-brand/25 transition-all hover:opacity-95 active:scale-95 cursor-pointer"
