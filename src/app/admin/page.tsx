@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
   PanelLeft,
@@ -276,11 +276,15 @@ export default function AdminPage() {
             </div>
           )}
           <button
-            onClick={() => router.push('/')}
+            onClick={() => {
+              if (window.confirm('Are you sure you want to log out?')) {
+                signOut({ callbackUrl: '/auth/login' });
+              }
+            }}
             className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-xs transition text-rose-500 hover:bg-rose-500/10`}
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            {sidebarOpen && <span>Marketplace</span>}
+            {sidebarOpen && <span>Super Admin</span>}
           </button>
         </div>
       </aside>
