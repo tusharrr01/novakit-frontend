@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { useGetDesignBySlugQuery, useGetDesignsQuery } from '@/src/redux/api/catalogApi';
+import { useGetDesignBySlugQuery, useGetDesignsQuery } from '@/src/redux/api/designApi';
 import { CatalogDetail, CatalogNotFound } from '@/src/components/reusable/CatalogDetail';
 import { SiteHeader } from '@/src/layout/site-header';
 import { SiteFooter } from '@/src/layout/site-footer';

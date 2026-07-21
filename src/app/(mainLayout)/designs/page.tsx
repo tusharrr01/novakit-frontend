@@ -1,7 +1,7 @@
 'use client';
 
 import { CatalogList } from '@/src/components/reusable/CatalogList';
-import { useGetDesignsQuery } from '@/src/redux/api/catalogApi';
+import { useGetDesignsQuery } from '@/src/redux/api/designApi';
 import { SiteHeader } from '@/src/layout/site-header';
 import { SiteFooter } from '@/src/layout/site-footer';
 

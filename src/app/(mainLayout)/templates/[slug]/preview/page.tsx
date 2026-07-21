@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { useGetTemplateBySlugQuery } from '@/src/redux/api/catalogApi';
+import { useGetTemplateBySlugQuery } from '@/src/redux/api/templateApi';
 import { SandpackPreview } from '@/src/components/feature/design/SandpackPreview';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
