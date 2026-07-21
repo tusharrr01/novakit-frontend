@@ -1,243 +1,356 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import {
-  TrendingUp,
+  LayoutDashboard,
+  PanelLeft,
   ShoppingBag,
-  Users,
-  LineChart,
-  Star,
-  ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  ExternalLink,
+  Users as UsersIcon,
+  Settings,
+  BarChart3,
+  Package,
+  Plus,
+  Sparkles,
+  LogOut,
+  Wallet,
+  Globe,
+  CreditCard,
+  Layers,
+  Megaphone,
+  AtSign,
+  ShieldCheck,
+  Receipt,
+  Eye,
+  MessageSquare,
+  Key as KeyIcon,
+  Languages,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { useGetAdminOrderStatsQuery, useGetAdminOrdersQuery } from '@/src/redux/api/orderApi';
-import { useCurrency } from '@/src/lib/currency';
 
-export default function AdminDashboardPage() {
-  const { data: statsData, isLoading: statsLoading } = useGetAdminOrderStatsQuery(undefined);
-  const { data: ordersData, isLoading: ordersLoading } = useGetAdminOrdersQuery({ limit: 5 });
-  const { formatPrice } = useCurrency();
+import { ThemeToggle } from '@/src/layout/theme-toggle';
+import { Logo } from '@/src/layout/logo';
+import { LanguageSwitcher, CurrencySwitcher } from '@/src/components/site/site-header';
+import { SystemPreferencesTab } from '@/src/components/admin/system-preferences-tab';
+import { PageManagementTab } from '@/src/components/admin/page-management-tab';
+import { ProductsTab } from '@/src/components/admin/products-tab';
+import { DesignsAdmin } from '@/src/components/admin/designs-admin';
+import { AnnouncementsTab } from '@/src/components/admin/announcements-tab';
+import { OrdersTab } from '@/src/components/admin/orders-tab';
+import { OverviewTab } from '@/src/components/admin/overview-tab';
+import { NotificationsBell } from '@/src/components/admin/notifications-bell';
 
-  const stats = statsData?.data || {
-    totalSales: 0,
-    orderCount: 0,
-    monthlySales: [],
-  };
+import { AnalyticsTab } from '@/src/components/admin/analytics-tab';
+import { UsersTab } from '@/src/components/admin/users-tab';
+import { RolesTab } from '@/src/components/admin/roles-tab';
+import { PlansTab } from '@/src/components/admin/plans-tab';
+import { FaqsTab } from '@/src/components/admin/faqs-tab';
+import { TestimonialsTab } from '@/src/components/admin/testimonials-tab';
+import { AuthPagesTab } from '@/src/components/admin/authpages-tab';
+import { EmailTemplatesTab } from '@/src/components/admin/emails-tab';
+import { PaymentsTab } from '@/src/components/admin/payments-tab';
+import { LanguageLibraryTab } from '@/src/components/admin/language-tab';
+import { CurrencyOptionsTab } from '@/src/components/admin/currency-tab';
+import { getInitials } from '@/src/lib/auth';
 
-  const recentOrders = ordersData?.data || [];
+type TabKey =
+  | 'overview'
+  | 'analytics'
+  | 'users'
+  | 'products'
+  | 'orders'
+  | 'plans'
+  | 'payouts'
+  | 'roles'
+  | 'pages'
+  | 'faqs'
+  | 'testimonials'
+  | 'authpages'
+  | 'emails'
+  | 'announcements'
+  | 'payments'
+  | 'language'
+  | 'currency'
+  | 'syspref';
 
-  const cards = [
+export default function AdminPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Collapsible sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Tab states
+  const [tab, setTab] = useState<TabKey>('overview');
+  const [productSub, setProductSub] = useState<'templates' | 'designs' | 'services'>('templates');
+  const [planSub, setPlanSub] = useState<'management' | 'customers'>('management');
+
+  // Route protection checks
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 text-neutral-500 text-sm">
+        Verifying administrator session...
+      </div>
+    );
+  }
+
+  const role = (session?.user as any)?.role || (session?.user as any)?.role_key || 'user';
+  const isAdmin = role === 'admin' || role === 'super_admin';
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 dark:bg-neutral-950 text-center p-8">
+        <ShieldCheck className="h-16 w-16 text-rose-500 mb-4 animate-bounce" />
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Access Denied</h1>
+        <p className="mt-2 text-sm text-neutral-500 max-w-sm">
+          You do not have the required administrative permissions to access this control dashboard.
+        </p>
+        <Link href="/" className="mt-6 text-sm font-semibold text-indigo-600 hover:underline">
+          Return to Marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  const userName = session?.user?.name || 'Administrator';
+  const userEmail = session?.user?.email || 'admin@novakit.app';
+
+  // Navigation configurations
+  const menuGroups = [
     {
-      name: 'Gross revenue',
-      value: formatPrice(stats.totalSales),
-      change: '+14.2%',
-      changeType: 'increase',
-      icon: LineChart,
-      color: 'text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40',
+      title: 'Main',
+      items: [
+        { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+        { key: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { key: 'users', label: 'Users', icon: UsersIcon },
+        {
+          key: 'products',
+          label: 'Products',
+          icon: Package,
+          expandable: true,
+          subItems: [
+            { subKey: 'templates', label: 'Templates' },
+            { subKey: 'designs', label: 'Designs' },
+            { subKey: 'services', label: 'Services' },
+          ],
+        },
+        { key: 'orders', label: 'Orders', icon: ShoppingBag },
+        {
+          key: 'plans',
+          label: 'Plans',
+          icon: Receipt,
+          expandable: true,
+          subItems: [
+            { subKey: 'management', label: 'Plan management' },
+            { subKey: 'customers', label: 'Customer plans' },
+          ],
+        },
+      ],
     },
     {
-      name: 'Transactions logs',
-      value: stats.orderCount,
-      change: '+8.3%',
-      changeType: 'increase',
-      icon: ShoppingBag,
-      color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40',
+      title: 'Operations',
+      items: [
+        { key: 'payouts', label: 'Payouts', icon: Wallet },
+        { key: 'roles', label: 'Permission management', icon: ShieldCheck },
+        { key: 'pages', label: 'Page management', icon: Layers },
+      ],
     },
     {
-      name: 'Active customers',
-      value: '1,482',
-      change: '+18.1%',
-      changeType: 'increase',
-      icon: Users,
-      color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40',
+      title: 'Content',
+      items: [
+        { key: 'faqs', label: 'FAQs', icon: MessageSquare },
+        { key: 'testimonials', label: 'Testimonials', icon: Eye },
+        { key: 'authpages', label: 'Auth pages', icon: KeyIcon },
+        { key: 'emails', label: 'Email templates', icon: AtSign },
+        { key: 'announcements', label: 'Announcements', icon: Megaphone },
+      ],
     },
     {
-      name: 'Conversion index',
-      value: '4.82%',
-      change: '-1.4%',
-      changeType: 'decrease',
-      icon: TrendingUp,
-      color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40',
+      title: 'Settings',
+      items: [
+        { key: 'payments', label: 'Payment gateways', icon: CreditCard },
+        { key: 'language', label: 'Language library', icon: Languages },
+        { key: 'currency', label: 'Currency options', icon: SlidersHorizontal },
+        { key: 'syspref', label: 'System preferences', icon: Settings },
+      ],
     },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">Admin Dashboard</h1>
-        <p className="mt-1.5 text-sm text-neutral-500">
-          General business summaries, sales performance insights and real-time transaction streams.
-        </p>
-      </div>
+    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+      {/* Sidebar navigation panel */}
+      <aside
+        className={`flex flex-col border-r border-border/60 bg-card/60 backdrop-blur-xl transition-all duration-300 ${
+          sidebarOpen ? 'w-64' : 'w-16'
+        }`}
+      >
+        <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-border/60">
+          {sidebarOpen ? <Logo /> : <div className="h-8 w-8 rounded bg-brand/10" />}
+        </div>
 
-      {/* Stats Cards grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.name}
-              className="rounded-2xl border border-neutral-200 dark:border-neutral-850 bg-white dark:bg-neutral-900/60 p-5 flex items-center justify-between"
-            >
-              <div className="space-y-1">
-                <span className="text-xs text-neutral-450 uppercase font-bold tracking-wider">{card.name}</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-extrabold text-neutral-900 dark:text-white tracking-tight">{card.value}</span>
-                  <span
-                    className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
-                      card.changeType === 'increase' ? 'text-emerald-500' : 'text-rose-500'
-                    }`}
-                  >
-                    {card.changeType === 'increase' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                    {card.change}
-                  </span>
-                </div>
-              </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar p-3 space-y-4">
+          {menuGroups.map((g) => (
+            <div key={g.title} className="space-y-1">
+              {sidebarOpen && (
+                <h4 className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                  {g.title}
+                </h4>
+              )}
+              <div className="space-y-0.5">
+                {g.items.map((i) => {
+                  const Icon = i.icon;
+                  const isSelected = tab === i.key;
+                  return (
+                    <div key={i.key} className="space-y-0.5">
+                      <button
+                        onClick={() => {
+                          setTab(i.key as TabKey);
+                          if (i.key === 'products') setProductSub('templates');
+                          if (i.key === 'plans') setPlanSub('management');
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-all ${
+                          isSelected
+                            ? 'bg-brand/10 text-brand font-medium'
+                            : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {sidebarOpen && <span className="truncate">{i.label}</span>}
+                      </button>
 
-              <div className={`h-11 w-11 rounded-xl flex items-center justify-center ${card.color}`}>
-                <Icon className="h-5 w-5" />
+                      {/* Expandable submenus */}
+                      {i.expandable && sidebarOpen && isSelected && (
+                        <div className="ml-7 border-l border-border pl-2 space-y-1">
+                          {i.subItems?.map((s) => {
+                            const subActive =
+                              i.key === 'products'
+                                ? productSub === s.subKey
+                                : planSub === s.subKey;
+                            return (
+                              <button
+                                key={s.subKey}
+                                onClick={() => {
+                                  if (i.key === 'products') {
+                                    setProductSub(s.subKey as any);
+                                  } else {
+                                    setPlanSub(s.subKey as any);
+                                  }
+                                }}
+                                className={`block w-full py-1 text-left text-xs transition ${
+                                  subActive ? 'text-brand font-medium' : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                              >
+                                {s.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Chart and Activity Grid */}
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        {/* Sales Chart */}
-        <div className="rounded-2xl border border-neutral-200 dark:border-neutral-850 bg-white dark:bg-neutral-900/60 p-6 flex flex-col justify-between">
-          <div className="mb-4">
-            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Sales Chart Performance</h3>
-            <p className="text-xs text-neutral-450 mt-0.5">Calculated monthly overview</p>
-          </div>
-
-          {/* Simple Inline SVG Line Chart */}
-          <div className="h-64 w-full relative flex items-end">
-            <svg className="w-full h-full" viewBox="0 0 600 240" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              {/* Grid Lines */}
-              <line x1="0" y1="60" x2="600" y2="60" stroke="#888" strokeOpacity="0.08" strokeDasharray="4 4" />
-              <line x1="0" y1="120" x2="600" y2="120" stroke="#888" strokeOpacity="0.08" strokeDasharray="4 4" />
-              <line x1="0" y1="180" x2="600" y2="180" stroke="#888" strokeOpacity="0.08" strokeDasharray="4 4" />
-
-              {/* Area path */}
-              <path
-                d="M 0 240 L 50 180 L 150 150 L 250 160 L 350 110 L 450 130 L 550 70 L 600 240 Z"
-                fill="url(#chartGradient)"
-              />
-              {/* Line path */}
-              <path
-                d="M 50 180 L 150 150 L 250 160 L 350 110 L 450 130 L 550 70"
-                fill="none"
-                stroke="#4f46e5"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Dots */}
-              <circle cx="50" cy="180" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              <circle cx="150" cy="150" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              <circle cx="250" cy="160" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              <circle cx="350" cy="110" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              <circle cx="450" cy="130" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-              <circle cx="550" cy="70" r="5" fill="#4f46e5" stroke="#fff" strokeWidth="2" />
-            </svg>
-          </div>
-
-          <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold tracking-wider mt-4 px-2">
-            <span>JAN</span>
-            <span>FEB</span>
-            <span>MAR</span>
-            <span>APR</span>
-            <span>MAY</span>
-            <span>JUN</span>
-          </div>
+          ))}
         </div>
 
-        {/* Recent Activity Stream */}
-        <div className="rounded-2xl border border-neutral-200 dark:border-neutral-850 bg-white dark:bg-neutral-900/60 p-6 flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Recent Operations</h3>
-            <p className="text-xs text-neutral-450 mt-0.5">Real-time system events</p>
-          </div>
-
-          <div className="mt-5 space-y-4 flex-1">
-            {[
-              { label: 'Template created', desc: 'Aurora dashboard starter catalog added', time: '10 min ago' },
-              { label: 'Role permissions edited', desc: 'Admin role mapped with write.catalog settings', time: '2 hours ago' },
-              { label: 'Transaction verified', desc: 'Stripe order ch_stripe_mock_991823a completed', time: '4 hours ago' },
-              { label: 'Maintenance mode toggled', desc: 'Status switched to active check offline', time: '1 day ago' },
-            ].map((act, i) => (
-              <div key={i} className="flex gap-3 text-xs leading-normal">
-                <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
-                <div className="flex-1 flex flex-col">
-                  <span className="font-semibold text-neutral-800 dark:text-neutral-200">{act.label}</span>
-                  <span className="text-neutral-450 text-[11px] mt-0.5">{act.desc}</span>
-                </div>
-                <span className="text-[10px] text-neutral-400 font-medium shrink-0 flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {act.time}
-                </span>
+        {/* User context footer */}
+        <div className="p-4 border-t border-border/60 flex flex-col gap-2">
+          {sidebarOpen && (
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white shadow">
+                {getInitials(userName)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-semibold">{userName}</div>
+                <div className="truncate text-[10px] text-muted-foreground">{userEmail}</div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Transactions streams */}
-      <div className="rounded-2xl border border-neutral-200 dark:border-neutral-850 bg-white dark:bg-neutral-900/60 p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Latest Transactions</h3>
-            <p className="text-xs text-neutral-450 mt-0.5">Purchases log</p>
-          </div>
-          <button className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-            View All Orders
+            </div>
+          )}
+          <button
+            onClick={() => router.push('/')}
+            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-xs transition text-rose-500 hover:bg-rose-500/10`}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            {sidebarOpen && <span>Marketplace</span>}
           </button>
         </div>
+      </aside>
 
-        {ordersLoading ? (
-          <div className="p-10 text-center text-xs text-neutral-500">Fetching live orders stream...</div>
-        ) : recentOrders.length === 0 ? (
-          <div className="p-10 text-center text-xs text-neutral-500">No transactions recorded yet.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-neutral-100 dark:border-neutral-800 text-neutral-400 font-bold uppercase tracking-wider">
-                  <th className="pb-3 font-semibold">Buyer Name</th>
-                  <th className="pb-3 font-semibold">Email address</th>
-                  <th className="pb-3 font-semibold">Transaction ID</th>
-                  <th className="pb-3 font-semibold">Total Price</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-850 text-neutral-700 dark:text-neutral-300">
-                {recentOrders.slice(0, 5).map((order: any) => (
-                  <tr key={order._id} className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30">
-                    <td className="py-3.5 font-semibold text-neutral-900 dark:text-white">{order.buyer_name}</td>
-                    <td className="py-3.5">{order.buyer_email}</td>
-                    <td className="py-3.5 font-mono text-[10px] text-neutral-450">{order.transaction_id}</td>
-                    <td className="py-3.5 font-bold text-neutral-900 dark:text-white">{formatPrice(order.total_price)}</td>
-                    <td className="py-3.5">
-                      <span className="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-450 uppercase tracking-wider">
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Main dashboard content container */}
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 bg-card/45 px-4 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:border-brand/40"
+              aria-label="Toggle sidebar"
+            >
+              <PanelLeft className="h-4 w-4" />
+            </button>
+            {sidebarOpen && (
+              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60 hidden sm:inline">
+                Admin Panel / {tab}
+              </span>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <CurrencySwitcher />
+            <ThemeToggle />
+            <NotificationsBell />
+          </div>
+        </header>
+
+        {/* Dynamic content rendering frame */}
+        <div className="flex-1 min-h-0 p-4 lg:p-6 overflow-hidden">
+          {tab === 'overview' && <OverviewTab />}
+          {tab === 'analytics' && <AnalyticsTab />}
+          {tab === 'users' && <UsersTab />}
+          {tab === 'products' && (
+            productSub === 'designs' ? (
+              <DesignsAdmin />
+            ) : (
+              <ProductsTab sub={productSub} />
+            )
+          )}
+          {tab === 'orders' && <OrdersTab />}
+          {tab === 'plans' && <PlansTab sub={planSub} />}
+          {tab === 'payouts' && <ComingSoon label="Payouts" />}
+          {tab === 'roles' && <RolesTab />}
+          {tab === 'pages' && <PageManagementTab />}
+          {tab === 'faqs' && <FaqsTab />}
+          {tab === 'testimonials' && <TestimonialsTab />}
+          {tab === 'authpages' && <AuthPagesTab />}
+          {tab === 'emails' && <EmailTemplatesTab />}
+          {tab === 'announcements' && <AnnouncementsTab />}
+          {tab === 'payments' && <PaymentsTab />}
+          {tab === 'language' && <LanguageLibraryTab />}
+          {tab === 'currency' && <CurrencyOptionsTab />}
+          {tab === 'syspref' && <SystemPreferencesTab />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function ComingSoon({ label }: { label: string }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center text-center p-6 border border-border bg-card/40 rounded-xl">
+      <Sparkles className="h-12 w-12 text-brand animate-pulse mb-3" />
+      <h2 className="font-display text-xl font-semibold tracking-tight">{label} Module</h2>
+      <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+        This administration tab is currently under active development. More features are coming soon.
+      </p>
     </div>
   );
 }

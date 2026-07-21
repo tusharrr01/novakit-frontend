@@ -1,20 +1,21 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Space_Grotesk, DM_Sans } from 'next/font/google';
 import './globals.css';
 import NextAuthProvider from '@/src/components/providers/NextAuthProvider';
 import ReduxProvider from '@/src/components/providers/ReduxProvider';
 import DynamicSettingsProvider from '@/src/components/providers/DynamicSettingsProvider';
 import { ThemeProvider } from 'next-themes';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-display',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const dmSans = DM_Sans({
+  variable: '--font-sans',
   subsets: ['latin'],
 });
+
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'NovaKit',
@@ -30,7 +31,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning // Prevents class mismatch warnings during hydration when changing themes
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextAuthProvider>

@@ -1,0 +1,96 @@
+import { useEffect, useState } from 'react';
+
+export type AuthUser = {
+  email: string;
+  name: string;
+  avatar?: string;
+  joinedAt: string;
+  plan: 'Free' | 'Pro' | 'Studio';
+};
+
+const STORAGE_KEY = 'novakit:user';
+const EVENT = 'novakit:auth-changed';
+const listeners = new Set<() => void>();
+
+function readRaw(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+function notify() {
+  listeners.forEach((l) => l());
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(EVENT));
+  }
+}
+
+export const authStore = {
+  get: readRaw,
+  signIn(email: string, password: string): AuthUser {
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error('Enter a valid email');
+    if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
+    const nameFromEmail = email
+      .split('@')[0]
+      .replace(/[._-]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const existing = readRaw();
+    const user: AuthUser =
+      existing && existing.email === email
+        ? existing
+        : {
+            email,
+            name: nameFromEmail || 'NovaKit User',
+            joinedAt: new Date().toISOString(),
+            plan: 'Pro',
+          };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    notify();
+    return user;
+  },
+  update(patch: Partial<AuthUser>) {
+    const current = readRaw();
+    if (!current) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...patch }));
+    notify();
+  },
+  signOut() {
+    localStorage.removeItem(STORAGE_KEY);
+    notify();
+  },
+};
+
+export function useAuth() {
+  // Start as null (matches SSR) then hydrate after mount to avoid mismatches.
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setUser(readRaw());
+    setHydrated(true);
+    const onChange = () => setUser(readRaw());
+    listeners.add(onChange);
+    window.addEventListener(EVENT, onChange);
+    window.addEventListener('storage', onChange);
+    return () => {
+      listeners.delete(onChange);
+      window.removeEventListener(EVENT, onChange);
+      window.removeEventListener('storage', onChange);
+    };
+  }, []);
+
+  return { user, isAuthenticated: !!user, hydrated };
+}
+
+export function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() ?? '')
+    .join('');
+}

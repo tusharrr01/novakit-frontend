@@ -60,22 +60,22 @@ const DynamicSettingsProvider = ({ children }: DynamicSettingsProviderProps) => 
     const data = settingsData.data;
 
     // Theme Mode Config
-    if (data.default_theme) {
+    if (data.general?.defaultTheme) {
       const savedTheme = localStorage.getItem('theme');
       if (!savedTheme || savedTheme === 'system') {
-        setTheme(data.default_theme);
+        setTheme(data.general.defaultTheme);
       }
     }
 
     // Tab Title Config
-    const baseTitle = data.site_name || 'NovaKit';
+    const baseTitle = data.general?.appName || 'NovaKit';
     const fullTitle = `${baseTitle} | Premium Components & Templates Marketplace`;
     if (document.title !== fullTitle) {
       document.title = fullTitle;
     }
 
     // Meta Description Config
-    const description = data.site_description;
+    const description = data.general?.appDescription;
     if (description) {
       let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
       if (!meta) {
@@ -87,12 +87,15 @@ const DynamicSettingsProvider = ({ children }: DynamicSettingsProviderProps) => 
     }
 
     // Favicon Config
-    const resolvedFavicon = data.favicon_url || DEFAULT_FAVICON;
+    const resolvedFavicon = data.branding?.favicon || DEFAULT_FAVICON;
     applyFavicon(resolvedFavicon);
   }, [settingsData, pathname, mounted, setTheme]);
 
   // Maintenance screen fallback
-  if (mounted && settingsData?.data?.maintenance_mode) {
+  const isAdminPath = pathname?.startsWith('/admin');
+  if (mounted && settingsData?.data?.maintenance?.enabled && !isAdminPath) {
+    const mTitle = settingsData?.data?.maintenance?.title || 'System Under Maintenance';
+    const mMessage = settingsData?.data?.maintenance?.message || 'We are performing scheduled upgrades. We expect to be back online shortly.';
     return (
       <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-6 text-center">
         <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
@@ -100,12 +103,12 @@ const DynamicSettingsProvider = ({ children }: DynamicSettingsProviderProps) => 
           <div className="h-14 w-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-6">
             <span className="text-amber-500 text-2xl font-bold">!</span>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">System Under Maintenance</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{mTitle}</h1>
           <p className="mt-3 text-neutral-400 text-sm leading-relaxed">
-            We are currently executing scheduled upgrades to our network settings. We expect to be back online shortly. Thank you for your patience!
+            {mMessage}
           </p>
           <div className="mt-8 border-t border-neutral-800 pt-6 text-[10px] text-neutral-500 tracking-wider uppercase">
-            NovaKit Engine
+            {settingsData?.data?.general?.appName || 'NovaKit'} Engine
           </div>
         </div>
       </div>
