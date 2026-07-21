@@ -14,6 +14,7 @@ import {
   Settings as SettingsIcon,
   ShoppingBag,
   User as UserIcon,
+  Shield,
   X,
 } from 'lucide-react';
 import { Logo } from './Logo';
@@ -63,7 +64,7 @@ export function SiteHeader() {
           <CurrencySwitcher />
           <ThemeToggle />
           {isAuthenticated && user ? (
-            <UserMenu name={user.name} email={user.email} plan={user.plan} />
+            <UserMenu name={user.name} email={user.email} plan={user.plan} role={user.role} />
           ) : (
             <>
               <Link
@@ -182,7 +183,7 @@ export function LanguageSwitcher() {
   );
 }
 
-function UserMenu({ name, email, plan }: { name: string; email: string; plan: string }) {
+function UserMenu({ name, email, plan, role }: { name: string; email: string; plan: string; role?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -195,6 +196,8 @@ function UserMenu({ name, email, plan }: { name: string; email: string; plan: st
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
+
+  const isAdmin = role?.toString().toLowerCase() === 'admin';
 
   return (
     <div className="relative" ref={ref}>
@@ -225,6 +228,9 @@ function UserMenu({ name, email, plan }: { name: string; email: string; plan: st
             </div>
           </div>
           <div className="p-1 text-sm">
+            {isAdmin && (
+              <MenuLink href="/admin" icon={Shield} label={t('Admin dashboard')} onClose={() => setOpen(false)} />
+            )}
             <MenuLink href="/profile" icon={UserIcon} label={t('Your profile')} onClose={() => setOpen(false)} />
             <MenuLink href="/profile" icon={ShoppingBag} label={t('Purchases & downloads')} onClose={() => setOpen(false)} />
             <MenuLink href="/profile" icon={Receipt} label={t('Billing & invoices')} onClose={() => setOpen(false)} />

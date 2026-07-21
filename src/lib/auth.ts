@@ -7,6 +7,7 @@ export type AuthUser = {
   avatar?: string;
   joinedAt: string;
   plan: 'Free' | 'Pro' | 'Studio';
+  role?: string;
 };
 
 const STORAGE_KEY = 'novakit:user';
@@ -74,13 +75,14 @@ export function useAuth() {
     if (status === 'loading') return;
 
     if (session?.user) {
-      const isUserAdmin = (session.user as any).role?.toString().toLowerCase() === 'admin';
-      setUser({
-        name: session.user.name || 'NovaKit User',
-        email: session.user.email || '',
-        plan: (session.user as any).plan || (isUserAdmin ? 'Studio' : 'Pro'),
-        joinedAt: new Date().toISOString(),
-      });
+       const isUserAdmin = (session.user as any).role?.toString().toLowerCase() === 'admin';
+       setUser({
+         name: session.user.name || 'NovaKit User',
+         email: session.user.email || '',
+         plan: (session.user as any).plan || (isUserAdmin ? 'Studio' : 'Pro'),
+         role: (session.user as any).role || 'user',
+         joinedAt: new Date().toISOString(),
+       });
     } else {
       setUser(readRaw());
     }
