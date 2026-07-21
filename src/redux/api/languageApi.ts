@@ -3,7 +3,7 @@ import { baseApi } from './baseApi';
 export const languageApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getLanguages: builder.query({
-      query: () => '/catalog/languages',
+      query: () => '/languages',
       providesTags: ['Languages'],
     }),
   }),

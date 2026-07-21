@@ -4,18 +4,18 @@ export const serviceApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getServices: builder.query({
       query: (params) => ({
-        url: '/catalog/services',
+        url: '/services',
         params,
       }),
       providesTags: ['Services'],
     }),
     getServiceBySlug: builder.query({
-      query: (slug) => `/catalog/services/${slug}`,
+      query: (slug) => `/services/${slug}`,
       providesTags: ['Services'],
     }),
     createAdminService: builder.mutation({
       query: (body) => ({
-        url: '/admin/catalog/services',
+        url: '/admin/services/create',
         method: 'POST',
         body,
       }),
@@ -23,7 +23,7 @@ export const serviceApi = baseApi.injectEndpoints({
     }),
     updateAdminService: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `/admin/catalog/services/${id}`,
+        url: `/admin/services/edit/${id}`,
         method: 'PUT',
         body,
       }),
@@ -31,7 +31,7 @@ export const serviceApi = baseApi.injectEndpoints({
     }),
     deleteAdminService: builder.mutation({
       query: (id) => ({
-        url: `/admin/catalog/services/${id}`,
+        url: `/admin/services/delete/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Services'],

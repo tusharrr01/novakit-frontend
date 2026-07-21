@@ -4,18 +4,18 @@ export const designApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDesigns: builder.query({
       query: (params) => ({
-        url: '/catalog/designs',
+        url: '/designs',
         params,
       }),
       providesTags: ['Designs'],
     }),
     getDesignBySlug: builder.query({
-      query: (slug) => `/catalog/designs/${slug}`,
+      query: (slug) => `/designs/${slug}`,
       providesTags: ['Designs'],
     }),
     createAdminDesign: builder.mutation({
       query: (body) => ({
-        url: '/admin/catalog/designs',
+        url: '/admin/designs/create',
         method: 'POST',
         body,
       }),
@@ -23,7 +23,7 @@ export const designApi = baseApi.injectEndpoints({
     }),
     updateAdminDesign: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `/admin/catalog/designs/${id}`,
+        url: `/admin/designs/edit/${id}`,
         method: 'PUT',
         body,
       }),
@@ -31,7 +31,7 @@ export const designApi = baseApi.injectEndpoints({
     }),
     deleteAdminDesign: builder.mutation({
       query: (id) => ({
-        url: `/admin/catalog/designs/${id}`,
+        url: `/admin/designs/delete/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Designs'],

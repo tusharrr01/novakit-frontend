@@ -4,18 +4,18 @@ export const templateApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getTemplates: builder.query({
       query: (params) => ({
-        url: '/catalog/templates',
+        url: '/templates',
         params,
       }),
       providesTags: ['Templates'],
     }),
     getTemplateBySlug: builder.query({
-      query: (slug) => `/catalog/templates/${slug}`,
+      query: (slug) => `/templates/${slug}`,
       providesTags: ['Templates'],
     }),
     createAdminTemplate: builder.mutation({
       query: (body) => ({
-        url: '/admin/catalog/templates',
+        url: '/admin/templates/create',
         method: 'POST',
         body,
       }),
@@ -23,7 +23,7 @@ export const templateApi = baseApi.injectEndpoints({
     }),
     updateAdminTemplate: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `/admin/catalog/templates/${id}`,
+        url: `/admin/templates/edit/${id}`,
         method: 'PUT',
         body,
       }),
@@ -31,7 +31,7 @@ export const templateApi = baseApi.injectEndpoints({
     }),
     deleteAdminTemplate: builder.mutation({
       query: (id) => ({
-        url: `/admin/catalog/templates/${id}`,
+        url: `/admin/templates/delete/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Templates'],

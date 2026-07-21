@@ -3,12 +3,12 @@ import { baseApi } from './baseApi';
 export const faqApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFaqs: builder.query({
-      query: () => '/catalog/faqs',
+      query: () => '/faqs',
       providesTags: ['Faqs'],
     }),
     createAdminFaq: builder.mutation({
       query: (body) => ({
-        url: '/admin/catalog/faqs',
+        url: '/admin/faqs/create',
         method: 'POST',
         body,
       }),
@@ -16,7 +16,7 @@ export const faqApi = baseApi.injectEndpoints({
     }),
     updateAdminFaq: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `/admin/catalog/faqs/${id}`,
+        url: `/admin/faqs/edit/${id}`,
         method: 'PUT',
         body,
       }),
@@ -24,7 +24,7 @@ export const faqApi = baseApi.injectEndpoints({
     }),
     deleteAdminFaq: builder.mutation({
       query: (id) => ({
-        url: `/admin/catalog/faqs/${id}`,
+        url: `/admin/faqs/delete/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Faqs'],
