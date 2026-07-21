@@ -260,45 +260,17 @@
 
 @utility custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--brand) transparent;
+  scrollbar-color: color-mix(in oklab, var(--brand) 60%, transparent) transparent;
 
   &::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 2px;
+    height: 2px;
   }
   &::-webkit-scrollbar-track {
-    background: color-mix(in oklab, var(--foreground) 5%, transparent);
+    -webkit-box-shadow: inset 0 0 6px #e9edf1;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: var(--brand);
-    border-radius: 10px;
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--brand) 80%, transparent);
-  }
-  &::-webkit-scrollbar-button {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-}
-
-@utility custom-scrollbar-horizontal {
-  scrollbar-width: thin;
-  scrollbar-color: var(--brand) transparent;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: color-mix(in oklab, var(--foreground) 5%, transparent);
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--brand);
-    border-radius: 10px;
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--brand) 80%, transparent);
+    background-color: color-mix(in oklab, var(--brand) 60%, transparent);
   }
   &::-webkit-scrollbar-button {
     display: none !important;
@@ -307,31 +279,37 @@
   }
 }
 
-html {
+.dark .custom-scrollbar {
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px var(--background);
+  }
+}
+
+@utility custom-scrollbar-horizontal {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--border) 90%, transparent) transparent;
+  scrollbar-color: color-mix(in oklab, var(--brand) 60%, transparent) transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px #e9edf1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--brand) 60%, transparent);
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
-*::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-*::-webkit-scrollbar-thumb {
-  background-color: color-mix(in oklab, var(--border) 90%, transparent);
-  border-radius: 9999px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in oklab, var(--brand) 60%, var(--border));
-}
-*::-webkit-scrollbar-corner {
-  background: transparent;
-}
-*::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+
+.dark .custom-scrollbar-horizontal {
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px var(--background);
+  }
 }
 
 @keyframes marquee-x {
@@ -355,4 +333,13 @@ html {
 }
 .animate-fade-in {
   animation: fade-in 220ms ease-out;
+}
+
+.admin-page-content-area .custom-scrollbar {
+  padding-right: 1rem;
+}
+@media (min-width: 1024px) {
+  .admin-page-content-area .custom-scrollbar {
+    padding-right: 1.5rem;
+  }
 }

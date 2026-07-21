@@ -326,7 +326,7 @@ export default function AdminPage() {
         </header>
 
         {/* Dynamic content rendering frame */}
-        <div className="flex-1 min-h-0 p-4 lg:p-6 overflow-hidden">
+        <div className="flex-1 min-h-0 pl-4 pt-4 pb-4 pr-0 lg:pl-6 lg:pt-6 lg:pb-6 lg:pr-0 overflow-hidden admin-page-content-area">
           {tab === 'overview' && <OverviewTab />}
           {tab === 'analytics' && <AnalyticsTab />}
           {tab === 'users' && <UsersTab />}
