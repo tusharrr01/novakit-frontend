@@ -171,7 +171,7 @@ export function EmailTemplatesTab() {
             )}
           </div>
 
-          <div className="mt-5 flex-1 space-y-5 overflow-y-auto thin-scrollbar pr-1 pb-4">
+          <div className="mt-5 flex-1 space-y-5 overflow-y-auto custom-scrollbar pr-1 pb-4">
             {/* Live email preview */}
             <div className="admin-card p-6">
               <div className="mb-4 flex items-center justify-between">

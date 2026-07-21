@@ -197,7 +197,7 @@ export default function AdminPage() {
           {sidebarOpen ? <Logo /> : <div className="h-8 w-8 rounded bg-brand/10" />}
         </div>
 
-        <div className="flex-1 overflow-y-auto thin-scrollbar p-3 space-y-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-4">
           {menuGroups.map((g) => (
             <div key={g.title} className="space-y-1">
               {sidebarOpen && (

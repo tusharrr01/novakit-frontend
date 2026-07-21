@@ -89,7 +89,7 @@ export function DesignDetailBody({
             <span className="ml-2 rounded-full border border-border bg-background px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
               {bundle.language}
             </span>
-            <div className="ml-auto flex items-center gap-1 overflow-x-auto thin-scrollbar">
+            <div className="ml-auto flex items-center gap-1 overflow-x-auto custom-scrollbar">
               {design.bundles.map((b, i) => (
                 <button
                   key={b.id}
@@ -180,7 +180,7 @@ export function DesignDetailBody({
                 </div>
                 <CopyChip value={design.prompt} label="Copy" />
               </div>
-              <pre className="max-h-64 overflow-auto thin-scrollbar whitespace-pre-wrap rounded-lg bg-background p-3 text-xs text-muted-foreground">
+              <pre className="max-h-64 overflow-auto custom-scrollbar whitespace-pre-wrap rounded-lg bg-background p-3 text-xs text-muted-foreground">
                 {design.prompt}
               </pre>
             </div>

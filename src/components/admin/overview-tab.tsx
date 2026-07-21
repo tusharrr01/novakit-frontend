@@ -121,7 +121,7 @@ export function OverviewTab() {
         </div>
       </div>
 
-      <div className="flex-1 space-y-6 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 space-y-6 overflow-y-auto custom-scrollbar pt-6">
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {stats.map((s) => (

@@ -74,7 +74,7 @@ export function DesignPreviewModal({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto thin-scrollbar">
+        <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
           {loading || !design ? (
             <div className="flex h-full items-center justify-center text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />

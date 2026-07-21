@@ -561,7 +561,7 @@ export function ProductsTab({ sub = 'templates' }: { sub?: SubTab }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         {/* Grid */}
         {sub === 'templates' && (
           <Grid
@@ -981,7 +981,7 @@ function ModalShell({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="thin-scrollbar flex-1 overflow-y-auto p-5">{children}</div>
+        <div className="custom-scrollbar flex-1 overflow-y-auto p-5">{children}</div>
         {footer && <div className="flex items-center justify-end gap-2 border-t border-border bg-background/40 p-4">{footer}</div>}
       </div>
     </div>

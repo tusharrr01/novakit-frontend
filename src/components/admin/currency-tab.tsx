@@ -129,7 +129,7 @@ export function CurrencyOptionsTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-5">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-5">
         {/* Table */}
         <div className="overflow-hidden admin-card-static">
           <div className="grid grid-cols-[40px_70px_1fr_90px_100px_120px_120px_160px] items-center gap-3 border-b border-border/60 bg-accent/30 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">

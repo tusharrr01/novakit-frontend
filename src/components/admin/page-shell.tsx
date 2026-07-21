@@ -37,7 +37,7 @@ export function PageShell({
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       </div>
-      <div className="mt-6 min-h-0 flex-1 overflow-y-auto thin-scrollbar pr-1 pb-4">
+      <div className="mt-6 min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
         {children}
       </div>
     </div>

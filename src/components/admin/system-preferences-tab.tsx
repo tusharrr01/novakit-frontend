@@ -79,7 +79,7 @@ export function SystemPreferencesTab() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden lg:flex-row">
         {/* Sidebar */}
-        <aside className="max-h-72 min-h-0 w-full shrink-0 overflow-y-auto thin-scrollbar rounded-lg border border-border/60 bg-card p-2 lg:max-h-none lg:w-72">
+        <aside className="max-h-72 min-h-0 w-full shrink-0 overflow-y-auto custom-scrollbar rounded-lg border border-border/60 bg-card p-2 lg:max-h-none lg:w-72">
           <nav className="space-y-1">
             {SUBS.map((s) => {
               const SIcon = s.icon;
@@ -143,7 +143,7 @@ export function SystemPreferencesTab() {
             </div>
           </div>
 
-          <div className="mt-4 flex-1 space-y-4 overflow-y-auto thin-scrollbar pr-1">
+          <div className="mt-4 flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-1">
             {/* Content */}
             {active === 'general' && (
               <>

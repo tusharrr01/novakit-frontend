@@ -119,7 +119,7 @@ export function RolesTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="grid gap-4 md:grid-cols-2">
           {items.map((r) => {
             const hasAll = DEFAULT_SCOPES.every((s) => r.scopes.includes(s.key));

@@ -167,7 +167,7 @@ export function AnnouncementsTab() {
             onPreview={() => setPreviewPopup(true)}
           />
         ) : (
-          <div className="mt-5 flex-1 overflow-y-auto thin-scrollbar pr-1">
+          <div className="mt-5 flex-1 overflow-y-auto custom-scrollbar pr-1">
             <MarqueeEditor draft={draft} setDraft={setDraft} />
           </div>
         )}
@@ -386,7 +386,7 @@ function PopupWorkspace({
   return (
     <div className="mt-5 flex min-h-0 flex-1 gap-5 overflow-hidden">
       {/* Left: trigger sub-section cards (non-scrolled) */}
-      <div className="hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto thin-scrollbar pr-1 lg:flex">
+      <div className="hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 lg:flex">
         <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Trigger sub-sections
         </div>
@@ -467,7 +467,7 @@ function PopupWorkspace({
       </div>
 
       {/* Right: editor for selected trigger */}
-      <div className="flex-1 overflow-y-auto thin-scrollbar pr-1">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
         <PopupVariantEditor
           popup={p}
           trigger={activeTrigger}

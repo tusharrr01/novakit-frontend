@@ -32,7 +32,7 @@ export function CodeViewer({
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5 overflow-x-auto thin-scrollbar">
+      <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5 overflow-x-auto custom-scrollbar">
         {bundle.files.map((f) => (
           <button
             key={f.name}
@@ -57,7 +57,7 @@ export function CodeViewer({
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="max-h-[520px] overflow-auto thin-scrollbar bg-[#0b0b14] p-4 text-xs leading-relaxed text-slate-100">
+      <pre className="max-h-[520px] overflow-auto custom-scrollbar bg-[#0b0b14] p-4 text-xs leading-relaxed text-slate-100">
         <code>{file.content}</code>
       </pre>
     </div>

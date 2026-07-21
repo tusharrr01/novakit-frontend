@@ -161,7 +161,7 @@ export function TestimonialsTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="overflow-hidden admin-card-static">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

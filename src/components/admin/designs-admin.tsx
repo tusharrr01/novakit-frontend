@@ -191,7 +191,7 @@ function DesignsList({
         </div>
       </div>
 
-      <div className="mt-4 min-h-0 flex-1 overflow-y-auto thin-scrollbar rounded-xl border border-border bg-card">
+      <div className="mt-4 min-h-0 flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-border bg-card">
         {loading ? (
           <div className="flex h-64 items-center justify-center text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -493,7 +493,7 @@ function DesignInfo({
         </div>
       </div>
 
-      <div className="mt-4 min-h-0 flex-1 overflow-y-auto thin-scrollbar pr-1">
+      <div className="mt-4 min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-3">
             <div className="flex flex-wrap gap-1">
@@ -675,7 +675,7 @@ function DesignEditor({
         </div>
       </div>
 
-      <div className="mt-4 min-h-0 flex-1 overflow-y-auto thin-scrollbar pr-1 pb-4">
+      <div className="mt-4 min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
           {/* LEFT — form */}
           <div className="space-y-4">

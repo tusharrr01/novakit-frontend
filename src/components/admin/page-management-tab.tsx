@@ -68,7 +68,7 @@ export function PageManagementTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="admin-card-static">
           <table className="w-full">
             <thead>

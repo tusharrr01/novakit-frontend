@@ -324,7 +324,7 @@ export function UsersTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         {selected.size > 0 && (
           <div className="flex items-center justify-between rounded-lg border border-brand/30 bg-brand/5 p-3 text-sm mb-4">
             <span>{selected.size} selected</span>

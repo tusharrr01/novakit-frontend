@@ -121,7 +121,7 @@ function PlanManagement({ plans, setPlans }: { plans: Plan[]; setPlans: React.Di
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((p) => (
             <div
@@ -508,7 +508,7 @@ function CustomerPlans({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6">
         <div className="overflow-hidden admin-card-static">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

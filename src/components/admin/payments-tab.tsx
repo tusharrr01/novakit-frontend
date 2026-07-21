@@ -105,7 +105,7 @@ export function PaymentsTab() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto thin-scrollbar pt-6 pb-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-4">
         <div className="admin-card p-6">
           {/* Provider selector */}
           <div className="mb-5">

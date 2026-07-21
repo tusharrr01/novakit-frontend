@@ -169,7 +169,7 @@ export function OrdersTab() {
 
       {/* Table */}
       <div className="mt-5 min-h-0 flex-1 overflow-hidden rounded-lg border border-border/70 bg-card">
-        <div className="h-full overflow-auto thin-scrollbar">
+        <div className="h-full overflow-auto custom-scrollbar">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-card text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
@@ -271,7 +271,7 @@ function OrderDetailPanel({ order, onBack }: { order: Order; onBack: () => void 
         </div>
       </div>
 
-      <div className="mt-6 min-h-0 flex-1 overflow-y-auto thin-scrollbar pr-1 pb-4">
+      <div className="mt-6 min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Left column */}
           <div className="space-y-4 lg:col-span-2">
