@@ -47,7 +47,7 @@ import {
   useChangePasswordMutation,
   useToggleTwoFactorMutation,
   useDeleteAccountMutation,
-} from '@/src/redux/api/authApi';
+} from '@/src/redux/api/profileApi';
 import { useGetMyOrdersQuery } from '@/src/redux/api/orderApi';
 
 type Tab =

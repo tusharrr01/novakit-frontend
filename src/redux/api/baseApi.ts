@@ -67,7 +67,7 @@ const baseQueryWithLogout: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       api.dispatch(setRTL(false));
 
       // Force NextAuth session cleanup
-      signOut({ redirect: true, callbackUrl: '/login' });
+      signOut({ redirect: true, callbackUrl: '/auth/login' });
     }
   }
 
@@ -76,7 +76,21 @@ const baseQueryWithLogout: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
 export const baseApi = createApi({
   reducerPath: 'api',
-  tagTypes: ['Roles', 'Permissions', 'Settings', 'Profile', 'Orders', 'UserOverrides'],
+  tagTypes: [
+    'Roles',
+    'Permissions',
+    'Settings',
+    'Profile',
+    'Orders',
+    'UserOverrides',
+    'Faqs',
+    'Testimonials',
+    'Templates',
+    'Designs',
+    'Services',
+    'Landing',
+    'Languages',
+  ],
   baseQuery: baseQueryWithLogout,
   endpoints: () => ({}),
 });
