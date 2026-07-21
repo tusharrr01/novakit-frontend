@@ -7,10 +7,14 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!token;
 
-  // If visiting auth pages but already authenticated, redirect to admin
+  // Role-based auth redirect
   const isAuthPage = pathname.startsWith('/auth');
   if (isAuthPage && isAuthenticated) {
-    return NextResponse.redirect(new URL('/admin', req.url));
+    const role = token?.role;
+    if (role === 'Admin') {
+      return NextResponse.redirect(new URL('/admin', req.url));
+    }
+    return NextResponse.redirect(new URL('/profile', req.url));
   }
 
   // Define protected pages that require authentication
@@ -21,6 +25,15 @@ export async function proxy(req: NextRequest) {
     // Optionally redirect back after login
     loginUrl.searchParams.set('callbackUrl', req.url);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Centralized Admin role guard
+  if (pathname.startsWith('/admin') && isAuthenticated) {
+    const role = token?.role;
+    if (role !== 'Admin') {
+      // Redirect unauthorized user to their profile page
+      return NextResponse.redirect(new URL('/profile', req.url));
+    }
   }
 
   return NextResponse.next();
