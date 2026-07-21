@@ -3,12 +3,12 @@ import { baseApi } from './baseApi';
 export const profileApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query({
-      query: () => '/auth/profile',
+      query: () => '/profile',
       providesTags: ['Profile'],
     }),
     updateProfile: builder.mutation({
       query: (body) => ({
-        url: '/auth/profile',
+        url: '/profile',
         method: 'PUT',
         body,
       }),
@@ -16,21 +16,21 @@ export const profileApi = baseApi.injectEndpoints({
     }),
     changePassword: builder.mutation({
       query: (body) => ({
-        url: '/auth/change-password',
+        url: '/profile/change-password',
         method: 'PUT',
         body,
       }),
     }),
     toggleTwoFactor: builder.mutation({
       query: () => ({
-        url: '/auth/2fa',
+        url: '/profile/2fa',
         method: 'PUT',
       }),
       invalidatesTags: ['Profile'],
     }),
     deleteAccount: builder.mutation({
       query: () => ({
-        url: '/auth/account',
+        url: '/profile/account',
         method: 'DELETE',
       }),
       invalidatesTags: ['Profile'],
