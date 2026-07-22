@@ -58,18 +58,31 @@ export function SelectField({
         </label>
       )}
 
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <Select
+        value={value || undefined}
+        onValueChange={(val) => {
+          if (val) onChange(val);
+        }}
+        disabled={disabled}
+      >
         <SelectTrigger
           id={inputId}
           className={cn(
-            'w-full h-10 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 text-sm text-neutral-900 dark:text-white outline-none focus:ring-0 focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors',
+            'w-full h-11 rounded-xl border border-border bg-background px-3.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 transition-all',
             error && 'border-red-500 dark:border-red-500',
             triggerClassName
           )}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className="rounded-lg shadow-xl dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
+        <SelectContent
+          position="popper"
+          sideOffset={4}
+          className={cn(
+            'rounded-lg shadow-xl bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100',
+            'max-h-[min(320px,60vh)] overflow-y-auto'
+          )}
+        >
           {options.map((option) => (
             <SelectItem
               key={option.value}

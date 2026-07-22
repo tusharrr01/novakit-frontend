@@ -5,40 +5,34 @@ import { getToken } from 'next-auth/jwt';
 export async function proxy(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || 'supersecret_nextauth_987654321' });
   const { pathname } = req.nextUrl;
+
   const isAuthenticated = !!token;
-
-  // Role-based auth redirect
   const isAuthPage = pathname.startsWith('/auth');
+
+  // Allowed guest/public routes
+  const isGuestAllowed =
+    isAuthPage ||
+    pathname === '/' ||
+    pathname.startsWith('/templates') ||
+    pathname.startsWith('/designs') ||
+    pathname.startsWith('/services');
+
+  // 1. Redirect authenticated users away from /auth pages to their dashboard/home
   if (isAuthPage && isAuthenticated) {
-    const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
-    
-    // Redirect to callbackUrl if present and valid (starts with / to prevent external open redirects)
-    if (callbackUrl && callbackUrl.startsWith('/')) {
-      return NextResponse.redirect(new URL(callbackUrl, req.url));
-    }
-
     const role = token?.role?.toString().toLowerCase();
-    if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', req.url));
-    }
-    return NextResponse.redirect(new URL('/', req.url));
+    const destination = role === 'admin' ? '/admin' : '/';
+    return NextResponse.redirect(new URL(destination, req.url));
   }
 
-  // Define protected pages that require authentication
-  const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/profile') || pathname.startsWith('/orders');
-
-  if (isProtectedRoute && !isAuthenticated) {
-    const loginUrl = new URL('/auth/login', req.url);
-    // Optionally redirect back after login
-    loginUrl.searchParams.set('callbackUrl', req.url);
-    return NextResponse.redirect(loginUrl);
+  // 2. Redirect unauthenticated users attempting to access protected routes to login
+  if (!isAuthenticated && !isGuestAllowed) {
+    return NextResponse.redirect(new URL('/auth/login', req.url));
   }
 
-  // Centralized Admin role guard
+  // 3. Centralized Admin role guard for /admin routes
   if (pathname.startsWith('/admin') && isAuthenticated) {
     const role = token?.role?.toString().toLowerCase();
     if (role !== 'admin') {
-      // Redirect unauthorized user to their profile page
       return NextResponse.redirect(new URL('/', req.url));
     }
   }
@@ -48,14 +42,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, icons, etc. with extensions)
-     */
     '/((?!api/|_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf|otf|css|js)).*)',
   ],
 };

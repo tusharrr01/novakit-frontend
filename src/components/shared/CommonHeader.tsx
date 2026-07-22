@@ -60,7 +60,7 @@ export function CommonHeader({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground transition-all cursor-pointer"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground transition-all cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>

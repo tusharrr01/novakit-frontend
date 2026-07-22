@@ -6,6 +6,8 @@ import {
   Search,
   Plus,
   Filter,
+  Copy,
+  Check,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
@@ -45,7 +47,10 @@ import {
   useDeleteUserMutation,
   useBulkDeleteUsersMutation,
 } from '@/src/redux/api/userApi';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { toast } from 'sonner';
+import { Input as SharedInput } from '@/src/elements/ui/input';
 
 type User = {
   id: string;
@@ -59,22 +64,24 @@ type User = {
   joined: string; // ISO
   lastActive: string; // ISO
   country: string;
+  avatar?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  website?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  instagram?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  dob?: string | null;
+  email_verified?: boolean;
+  is_verified?: boolean;
+  wishlistCount?: number;
+  activeTemplatesCount?: number;
+  notes?: string;
 };
-
-const usersSeed: User[] = [
-  { id: 'u_001', name: 'Ava Bennett', email: 'ava@bennett.co', role: 'Admin', plan: 'Studio', status: 'Active', spend: 1249.5, orders: 18, joined: '2024-02-14', lastActive: '2026-07-09', country: 'US' },
-  { id: 'u_002', name: 'Leo Martins', email: 'leo.martins@studio.co', role: 'Author', plan: 'Pro', status: 'Active', spend: 812.0, orders: 12, joined: '2024-05-02', lastActive: '2026-07-08', country: 'PT' },
-  { id: 'u_003', name: 'Mira Chen', email: 'mira.chen@labs.io', role: 'Customer', plan: 'Pro', status: 'Suspended', spend: 349.0, orders: 5, joined: '2025-01-19', lastActive: '2026-06-22', country: 'SG' },
-  { id: 'u_004', name: 'Jonah Reed', email: 'jonah@reed.dev', role: 'Customer', plan: 'Free', status: 'Invited', spend: 0, orders: 0, joined: '2026-07-01', lastActive: '2026-07-01', country: 'UK' },
-  { id: 'u_005', name: 'Sana Iqbal', email: 'sana.iqbal@shop.pk', role: 'Customer', plan: 'Studio', status: 'Active', spend: 2140.75, orders: 22, joined: '2023-11-08', lastActive: '2026-07-09', country: 'PK' },
-  { id: 'u_006', name: 'Noah Fischer', email: 'noah@fischer.de', role: 'Customer', plan: 'Pro', status: 'Active', spend: 588.0, orders: 9, joined: '2024-08-30', lastActive: '2026-07-07', country: 'DE' },
-  { id: 'u_007', name: 'Priya Nair', email: 'priya.nair@studio.in', role: 'Author', plan: 'Studio', status: 'Active', spend: 1780.25, orders: 15, joined: '2024-03-11', lastActive: '2026-07-06', country: 'IN' },
-  { id: 'u_008', name: 'Diego Alvarez', email: 'diego@alvarez.mx', role: 'Customer', plan: 'Free', status: 'Active', spend: 0, orders: 0, joined: '2026-05-20', lastActive: '2026-07-05', country: 'MX' },
-  { id: 'u_009', name: 'Yuki Tanaka', email: 'yuki@tanaka.jp', role: 'Customer', plan: 'Pro', status: 'Active', spend: 442.5, orders: 7, joined: '2025-06-01', lastActive: '2026-07-09', country: 'JP' },
-  { id: 'u_010', name: 'Emma Wallace', email: 'emma@wallace.au', role: 'Customer', plan: 'Pro', status: 'Active', spend: 928.0, orders: 11, joined: '2024-12-14', lastActive: '2026-07-04', country: 'AU' },
-  { id: 'u_011', name: 'Marc Dubois', email: 'marc@dubois.fr', role: 'Customer', plan: 'Free', status: 'Suspended', spend: 49.0, orders: 1, joined: '2025-09-09', lastActive: '2026-02-11', country: 'FR' },
-  { id: 'u_012', name: 'Aisha Khan', email: 'aisha@khan.ae', role: 'Author', plan: 'Studio', status: 'Active', spend: 3120.0, orders: 27, joined: '2023-07-22', lastActive: '2026-07-08', country: 'AE' },
-];
 
 type SortKey = 'name' | 'email' | 'role' | 'plan' | 'status' | 'spend' | 'orders' | 'joined' | 'lastActive';
 type SortDir = 'asc' | 'desc';
@@ -200,6 +207,20 @@ export function UsersTab() {
       id: u.id || u._id,
       name: u.name || 'Unnamed',
       email: u.email || '',
+      avatar: u.avatar || null,
+      phone: u.phone || u.phone_number || null,
+      company: u.company || null,
+      website: u.website || null,
+      linkedin: u.linkedin || null,
+      github: u.github || null,
+      instagram: u.instagram || null,
+      address: u.address || null,
+      city: u.city || null,
+      state: u.state || null,
+      zip: u.zip || null,
+      dob: u.dob || null,
+      email_verified: Boolean(u.email_verified),
+      is_verified: Boolean(u.is_verified),
       role: u.role || 'Customer',
       plan: u.plan || 'Free',
       status: u.status || 'Active',
@@ -208,6 +229,8 @@ export function UsersTab() {
       joined: u.joined || new Date().toISOString(),
       lastActive: u.lastActive || new Date().toISOString(),
       country: u.country || 'US',
+      wishlistCount: u.wishlistCount || 0,
+      activeTemplatesCount: u.activeTemplatesCount || 0,
     }));
   }, [usersResponse]);
 
@@ -292,17 +315,6 @@ export function UsersTab() {
               options={['All', 'Free', 'Pro', 'Studio']}
               onChange={(v) => setPlan(v as typeof plan)}
             />
-            {plan !== 'All' && (
-              <button
-                onClick={() => {
-                  setPlan('All');
-                  setPage(1);
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1"
-              >
-                Clear filter
-              </button>
-            )}
           </div>
         }
       />
@@ -317,8 +329,12 @@ export function UsersTab() {
               header: 'User',
               cell: (row) => (
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white">
-                    {row.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+                  <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand-gradient text-xs font-semibold text-white shrink-0">
+                    {row.avatar ? (
+                      <img src={row.avatar} alt={row.name} className="h-full w-full object-cover" />
+                    ) : (
+                      row.name.split(' ').map((n) => n[0]).slice(0, 2).join('')
+                    )}
                   </span>
                   <div>
                     <div className="font-medium">{row.name}</div>
@@ -432,78 +448,97 @@ export function UsersTab() {
     </div>
   );
 }
-
 function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
   const isEdit = !!user;
   const locked = isEdit && user!.status !== 'Invited';
   const [firstInit, ...restInit] = user ? user.name.split(' ') : [''];
-  const [form, setForm] = useState({
-    firstName: user ? firstInit ?? '' : '',
-    lastName: user ? restInit.join(' ') : '',
-    email: user?.email ?? '',
-    phone: '',
-    country: user?.country ?? '',
-    city: '',
-    role: (user?.role ?? 'Customer') as User['role'],
-    plan: (user?.plan ?? 'Free') as User['plan'],
-    status: (user?.status ?? 'Invited') as User['status'],
-    password: '',
-    sendInvite: true,
-    twoFactor: false,
-    notes: '',
-  });
 
   const [createUserApi, { isLoading: isCreating }] = useCreateUserMutation();
   const [updateUserApi, { isLoading: isUpdating }] = useUpdateUserMutation();
 
-  function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-    setForm((f) => ({ ...f, [key]: value }));
-  }
+  const validationSchema = Yup.object().shape({
+    firstName: Yup.string().required('First name is required'),
+    lastName: Yup.string().required('Last name is required'),
+    email: Yup.string().required('Email is required').email('Invalid email address'),
+    phone: Yup.string().optional(),
+    country: Yup.string().optional(),
+    city: Yup.string().optional(),
+    role: Yup.string().oneOf(['Customer', 'Author', 'Admin']).required(),
+    plan: Yup.string().oneOf(['Free', 'Pro', 'Studio']).required(),
+    status: Yup.string().oneOf(['Invited', 'Active', 'Suspended']).required(),
+    password: Yup.string().optional(),
+    sendInvite: Yup.boolean(),
+    twoFactor: Yup.boolean(),
+    notes: Yup.string().max(50, 'Internal notes cannot exceed 50 characters').optional(),
+  });
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const fullName = `${form.firstName} ${form.lastName}`.trim();
-    if (!fullName || !form.email) {
-      toast.error('Name and email are required');
-      return;
-    }
-
-    try {
-      if (isEdit && user) {
-        await updateUserApi({
-          id: user.id,
-          name: fullName,
-          email: form.email,
-          role: form.role,
-          plan: form.plan,
-          status: form.status,
-          country: form.country,
-          password: form.password || undefined,
-        }).unwrap();
-        toast.success('User updated successfully');
-      } else {
-        await createUserApi({
-          name: fullName,
-          email: form.email,
-          role: form.role,
-          plan: form.plan,
-          status: form.status,
-          country: form.country,
-          password: form.password || '123456789',
-        }).unwrap();
-        toast.success('User created successfully');
+  const formik = useFormik({
+    initialValues: {
+      firstName: user ? firstInit ?? '' : '',
+      lastName: user ? restInit.join(' ') : '',
+      email: user?.email ?? '',
+      phone: '',
+      country: user?.country ?? '',
+      city: '',
+      role: (user?.role ?? 'Customer') as User['role'],
+      plan: (user?.plan ?? 'Free') as User['plan'],
+      status: (user?.status ?? 'Active') as User['status'],
+      password: '',
+      sendInvite: true,
+      twoFactor: false,
+      notes: user?.notes ?? '',
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      const fullName = `${values.firstName} ${values.lastName}`.trim();
+      try {
+        if (isEdit && user) {
+          await updateUserApi({
+            id: user.id,
+            name: fullName,
+            email: values.email,
+            role: values.role,
+            plan: values.plan,
+            status: values.status,
+            country: values.country,
+            password: values.password || undefined,
+          }).unwrap();
+          toast.success('User updated successfully');
+        } else {
+          await createUserApi({
+            name: fullName,
+            email: values.email,
+            role: values.role,
+            plan: values.plan,
+            status: values.status,
+            country: values.country,
+            password: values.password || '123456789',
+          }).unwrap();
+          toast.success('User created successfully');
+        }
+        onBack();
+      } catch (err: any) {
+        const backendError = err?.data?.message || err?.data?.error || err?.message || 'Operation failed';
+        toast.error(backendError);
       }
-      onBack();
-    } catch (err: any) {
-      toast.error(err?.data?.message || 'Operation failed');
+    },
+  });
+
+  // Show toast validation error if submit fails due to validation errors
+  useEffect(() => {
+    if (formik.submitCount > 0 && !formik.isValid) {
+      const errorValues = Object.values(formik.errors);
+      if (errorValues.length > 0) {
+        toast.error(`Validation Error: ${errorValues[0]}`);
+      }
     }
-  }
+  }, [formik.submitCount, formik.isValid, formik.errors]);
 
   const initials =
-    (form.firstName[0] ?? '') + (form.lastName[0] ?? '') || 'NU';
+    (formik.values.firstName[0] ?? '') + (formik.values.lastName[0] ?? '') || 'NU';
 
   return (
-    <form onSubmit={submit} className="space-y-6">
+    <form onSubmit={formik.handleSubmit} className="space-y-6">
       <CommonHeader
         title={isEdit ? `Edit ${user!.name}` : 'Add new user'}
         description={
@@ -531,56 +566,77 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
         <div className="space-y-6 lg:col-span-2">
           <Section title="Personal information" desc="Basic identity details for the new account.">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="First name" required>
+              <Field
+                label="First name"
+                required
+                error={formik.touched.firstName && formik.errors.firstName ? formik.errors.firstName : undefined}
+              >
                 <Input
-                  value={form.firstName}
-                  onChange={(v) => update('firstName', v)}
+                  value={formik.values.firstName}
+                  onChange={(v) => formik.setFieldValue('firstName', v)}
                   placeholder="Ava"
                   icon={<UserIcon className="h-4 w-4" />}
                   disabled={locked}
                 />
               </Field>
-              <Field label="Last name" required>
+              <Field
+                label="Last name"
+                required
+                error={formik.touched.lastName && formik.errors.lastName ? formik.errors.lastName : undefined}
+              >
                 <Input
-                  value={form.lastName}
-                  onChange={(v) => update('lastName', v)}
+                  value={formik.values.lastName}
+                  onChange={(v) => formik.setFieldValue('lastName', v)}
                   placeholder="Bennett"
                   icon={<UserIcon className="h-4 w-4" />}
                   disabled={locked}
                 />
               </Field>
-              <Field label="Email" required>
+              <Field
+                label="Email"
+                required
+                error={formik.touched.email && formik.errors.email ? formik.errors.email : undefined}
+              >
                 <Input
                   type="email"
-                  value={form.email}
-                  onChange={(v) => update('email', v)}
+                  value={formik.values.email}
+                  onChange={(v) => formik.setFieldValue('email', v)}
                   placeholder="ava@company.com"
                   icon={<Mail className="h-4 w-4" />}
                   disabled={locked}
                 />
               </Field>
-              <Field label="Phone">
+              <Field
+                label="Phone"
+                error={formik.touched.phone && formik.errors.phone ? formik.errors.phone : undefined}
+              >
                 <Input
-                  value={form.phone}
-                  onChange={(v) => update('phone', v)}
+                  value={formik.values.phone}
+                  onChange={(v) => formik.setFieldValue('phone', v)}
                   placeholder="+1 555 000 1234"
                   icon={<Phone className="h-4 w-4" />}
                   disabled={locked}
                 />
               </Field>
-              <Field label="Country">
+              <Field
+                label="Country"
+                error={formik.touched.country && formik.errors.country ? formik.errors.country : undefined}
+              >
                 <Input
-                  value={form.country}
-                  onChange={(v) => update('country', v)}
+                  value={formik.values.country}
+                  onChange={(v) => formik.setFieldValue('country', v)}
                   placeholder="United States"
                   icon={<MapPin className="h-4 w-4" />}
                   disabled={locked}
                 />
               </Field>
-              <Field label="City">
+              <Field
+                label="City"
+                error={formik.touched.city && formik.errors.city ? formik.errors.city : undefined}
+              >
                 <Input
-                  value={form.city}
-                  onChange={(v) => update('city', v)}
+                  value={formik.values.city}
+                  onChange={(v) => formik.setFieldValue('city', v)}
                   placeholder="San Francisco"
                   icon={<MapPin className="h-4 w-4" />}
                   disabled={locked}
@@ -589,73 +645,104 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
             </div>
           </Section>
 
-          <Section title="Access & permissions" desc="Choose the account role, plan and initial status.">
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Role">
-                <Select
-                  value={form.role}
-                  onChange={(v) => update('role', v as User['role'])}
-                  options={['Customer', 'Author', 'Admin']}
-                />
-              </Field>
-              <Field label="Plan">
-                <Select
-                  value={form.plan}
-                  onChange={(v) => update('plan', v as User['plan'])}
-                  options={['Free', 'Pro', 'Studio']}
-                  disabled={locked}
-                />
-              </Field>
-              <Field label="Status">
-                <Select
-                  value={form.status}
-                  onChange={(v) => update('status', v as User['status'])}
-                  options={['Invited', 'Active', 'Suspended']}
-                  disabled={locked}
-                />
-              </Field>
-            </div>
-          </Section>
+          {!isEdit ? (
+            <div className="grid gap-6 md:grid-cols-2 items-start">
+              <Section title="Security" desc="Set a temporary password or let the user create one via invite.">
+                <div className="space-y-4">
+                  <Field
+                    label="Temporary password"
+                    error={formik.touched.password && formik.errors.password ? formik.errors.password : undefined}
+                  >
+                    <Input
+                      type="text"
+                      value={formik.values.password}
+                      onChange={(v) => formik.setFieldValue('password', v)}
+                      placeholder="Auto-generate on invite"
+                      icon={<Shield className="h-4 w-4" />}
+                    />
+                  </Field>
+                  <div className="flex flex-col gap-3">
+                    <Toggle
+                      label="Send invite email"
+                      desc="Email the user a link to set their password."
+                      checked={formik.values.sendInvite}
+                      onChange={(v) => formik.setFieldValue('sendInvite', v)}
+                    />
+                    <Toggle
+                      label="Require 2FA"
+                      desc="User must enable two-factor on first login."
+                      checked={formik.values.twoFactor}
+                      onChange={(v) => formik.setFieldValue('twoFactor', v)}
+                    />
+                  </div>
+                </div>
+              </Section>
 
-          {!isEdit && (
-            <Section title="Security" desc="Set a temporary password or let the user create one via invite.">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Temporary password">
-                  <Input
-                    type="text"
-                    value={form.password}
-                    onChange={(v) => update('password', v)}
-                    placeholder="Auto-generate on invite"
-                    icon={<Shield className="h-4 w-4" />}
+              <Section title="Access & permissions" desc="Choose the account role and plan.">
+                <div className="grid gap-4">
+                  <Field
+                    label="Role"
+                    error={formik.touched.role && formik.errors.role ? formik.errors.role : undefined}
+                  >
+                    <Select
+                      value={formik.values.role}
+                      onChange={(v) => formik.setFieldValue('role', v)}
+                      options={['Customer', 'Author', 'Admin']}
+                    />
+                  </Field>
+                  <Field
+                    label="Plan"
+                    error={formik.touched.plan && formik.errors.plan ? formik.errors.plan : undefined}
+                  >
+                    <Select
+                      value={formik.values.plan}
+                      onChange={(v) => formik.setFieldValue('plan', v)}
+                      options={['Free', 'Pro', 'Studio']}
+                      disabled={locked}
+                    />
+                  </Field>
+                </div>
+              </Section>
+            </div>
+          ) : (
+            <Section title="Access & permissions" desc="Choose the account role, plan and initial status.">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field
+                  label="Role"
+                  error={formik.touched.role && formik.errors.role ? formik.errors.role : undefined}
+                >
+                  <Select
+                    value={formik.values.role}
+                    onChange={(v) => formik.setFieldValue('role', v)}
+                    options={['Customer', 'Author', 'Admin']}
                   />
                 </Field>
-                <div className="flex flex-col justify-end gap-3">
-                  <Toggle
-                    label="Send invite email"
-                    desc="Email the user a link to set their password."
-                    checked={form.sendInvite}
-                    onChange={(v) => update('sendInvite', v)}
+                <Field
+                  label="Plan"
+                  error={formik.touched.plan && formik.errors.plan ? formik.errors.plan : undefined}
+                >
+                  <Select
+                    value={formik.values.plan}
+                    onChange={(v) => formik.setFieldValue('plan', v)}
+                    options={['Free', 'Pro', 'Studio']}
+                    disabled={locked}
                   />
-                  <Toggle
-                    label="Require 2FA"
-                    desc="User must enable two-factor on first login."
-                    checked={form.twoFactor}
-                    onChange={(v) => update('twoFactor', v)}
+                </Field>
+                <Field
+                  label="Status"
+                  error={formik.touched.status && formik.errors.status ? formik.errors.status : undefined}
+                >
+                  <Select
+                    value={formik.values.status}
+                    onChange={(v) => formik.setFieldValue('status', v)}
+                    options={['Invited', 'Active', 'Suspended']}
+                    disabled={locked}
                   />
-                </div>
+                </Field>
               </div>
             </Section>
           )}
 
-          <Section title="Internal notes" desc="Only visible to admins.">
-            <textarea
-              value={form.notes}
-              onChange={(e) => update('notes', e.target.value)}
-              rows={4}
-              placeholder="Context, source of signup, agreements…"
-              className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
-            />
-          </Section>
         </div>
 
         <div className="space-y-6">
@@ -667,48 +754,45 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
                 {initials.toUpperCase()}
               </span>
               <div className="mt-4 font-display text-lg font-semibold">
-                {form.firstName || form.lastName
-                  ? `${form.firstName} ${form.lastName}`.trim()
+                {formik.values.firstName || formik.values.lastName
+                  ? `${formik.values.firstName} ${formik.values.lastName}`.trim()
                   : 'New user'}
               </div>
               <div className="text-sm text-muted-foreground">
-                {form.email || 'no-email@novakit.app'}
+                {formik.values.email || 'no-email@novakit.app'}
               </div>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                <PlanPill plan={form.plan} />
-                <StatusPill status={form.status} />
+                <PlanPill plan={formik.values.plan} />
+                <StatusPill status={formik.values.status} />
                 <span className="inline-flex items-center rounded-md border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground">
-                  {form.role}
+                  {formik.values.role}
                 </span>
               </div>
             </div>
-            {!isEdit && (
-              <button
-                type="button"
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              >
-                <Upload className="h-4 w-4" /> Upload avatar
-              </button>
-            )}
+
           </div>
 
-          <div className="admin-card p-6">
-            <h3 className="font-display text-base font-semibold">Quick tips</h3>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                Admins have full access to the dashboard and billing.
-              </li>
-              <li className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                Authors can publish and manage their own templates.
-              </li>
-              <li className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-                Invited users are inactive until they accept the email.
-              </li>
-            </ul>
-          </div>
+          <Section
+            title="Internal notes"
+            desc="Only visible to admins."
+            error={formik.touched.notes && formik.errors.notes ? formik.errors.notes : undefined}
+          >
+            <div className="relative">
+              <textarea
+                value={formik.values.notes}
+                onChange={formik.handleChange}
+                name="notes"
+                rows={6}
+                maxLength={50}
+                placeholder="Context, source of signup, agreements…"
+                className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
+              />
+              <div className="mt-1 flex justify-end text-xs text-muted-foreground">
+                {(formik.values.notes || '').length} / 50 characters
+              </div>
+            </div>
+          </Section>
+
         </div>
       </div>
     </form>
@@ -718,10 +802,12 @@ function AddUserView({ onBack, user }: { onBack: () => void; user?: User }) {
 function Section({
   title,
   desc,
+  error,
   children,
 }: {
   title: string;
   desc?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -731,6 +817,7 @@ function Section({
         {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
       </div>
       {children}
+      {error && <span className="mt-2 block text-xs text-destructive">{error}</span>}
     </div>
   );
 }
@@ -738,10 +825,12 @@ function Section({
 function Field({
   label,
   required,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -751,6 +840,7 @@ function Field({
         {required && <span className="ml-0.5 text-destructive">*</span>}
       </span>
       {children}
+      {error && <span className="mt-1 block text-xs text-destructive">{error}</span>}
     </label>
   );
 }
@@ -773,19 +863,17 @@ function Input({
   return (
     <div className="relative">
       {icon && (
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
           {icon}
         </span>
       )}
-      <input
+      <SharedInput
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`h-10 w-full rounded-md border border-border bg-background pr-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-60 ${
-          icon ? 'pl-9' : 'pl-3'
-        }`}
+        className={icon ? 'pl-10 h-10 bg-background' : 'pl-3 h-10 bg-background'}
       />
     </div>
   );
@@ -803,18 +891,13 @@ function Select({
   disabled?: boolean;
 }) {
   return (
-    <select
+    <SelectDropdown
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
+      options={options}
       disabled={disabled}
-      className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </select>
+      triggerClassName="h-10 text-sm font-normal rounded-md w-full justify-between"
+    />
   );
 }
 
@@ -865,6 +948,27 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
       : { dot: 'bg-rose-500', ring: 'ring-rose-500/30', icon: AlertTriangle };
   const StatusIcon = statusTone.icon;
 
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+
+  const displayPhone = user.phone || 'N/A';
+
+  const handleCopyEmail = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(user.email);
+    setCopiedEmail(true);
+    toast.success('Email address copied to clipboard');
+    setTimeout(() => setCopiedEmail(false), 2000);
+  };
+
+  const handleCopyPhone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(displayPhone);
+    setCopiedPhone(true);
+    toast.success('Phone number copied to clipboard');
+    setTimeout(() => setCopiedPhone(false), 2000);
+  };
+
   useEffect(() => {
     const original = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -875,49 +979,81 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/70 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 p-3 backdrop-blur-md animate-in fade-in duration-200 sm:p-4"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl rounded-md border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in zoom-in-95 duration-200"
       >
-        <div className="relative h-24 rounded-t-3xl bg-brand-gradient overflow-hidden sm:h-28">
+        <div className="relative h-26 bg-brand-gradient p-3 sm:h-28 sm:p-4 flex flex-col justify-between overflow-hidden">
           <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,white_1px,transparent_1px),radial-gradient(circle_at_80%_60%,white_1px,transparent_1px)] [background-size:32px_32px,48px_48px]" />
-          <button
-            onClick={onClose}
-            className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-sm transition hover:bg-black/40 hover:scale-105"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <div className="absolute left-5 top-3 inline-flex items-center gap-1.5 rounded-md bg-black/20 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-sm sm:left-6">
-            <Shield className="h-3 w-3" /> {user.role}
+          <div className="relative z-20 flex items-center justify-between">
+            <div className="inline-flex items-center gap-1 rounded-md bg-black/30 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+              <Shield className="h-2.5 w-2.5" /> {user.role}
+            </div>
+            <button
+              onClick={onClose}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition hover:bg-black/50 hover:scale-105"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <div className="relative z-20 pl-28 sm:pl-32 mt-3">
+            <h3 className="font-display text-base font-bold tracking-tight text-white drop-shadow-sm sm:text-lg">{user.name}</h3>
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-white/90 sm:gap-2 sm:text-xs">
+              <div className="inline-flex items-center gap-1 rounded-md bg-black/25 px-2 py-0.5 text-white/90 backdrop-blur-md border border-white/10">
+                <Mail className="h-3 w-3 text-white/80 shrink-0" />
+                <span className="truncate max-w-[140px] sm:max-w-none">{user.email}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  title="Copy email address"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded text-white/80 hover:bg-white/20 hover:text-white transition-all cursor-pointer shrink-0 ml-0.5"
+                >
+                  {copiedEmail ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
+                </button>
+              </div>
+
+              <div className="inline-flex items-center gap-1 rounded-md bg-black/25 px-2 py-0.5 text-white/90 backdrop-blur-md border border-white/10">
+                <Phone className="h-3 w-3 text-white/80 shrink-0" />
+                <span>{displayPhone}</span>
+                <button
+                  type="button"
+                  onClick={handleCopyPhone}
+                  title="Copy phone number"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded text-white/80 hover:bg-white/20 hover:text-white transition-all cursor-pointer shrink-0 ml-0.5"
+                >
+                  {copiedPhone ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="px-4 pb-4 sm:px-6 sm:pb-6">
-          <div className="-mt-10 flex flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:justify-between">
+          <div className="relative z-10 -mt-12 flex flex-wrap items-end justify-between gap-3 sm:-mt-14">
             <div className="flex items-end gap-3 sm:gap-4">
-              <div className="relative">
-                <span className="inline-flex h-16 w-16 items-center justify-center rounded-lg border-4 border-card bg-brand-gradient text-xl font-semibold text-white shadow-xl sm:h-20 sm:w-20 sm:text-2xl">
-                  {initials}
+              <div className="relative shrink-0">
+                <span className="relative flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-brand-gradient text-2xl font-semibold text-white shadow-xl sm:h-26 sm:w-26 sm:text-3xl shrink-0">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
                 </span>
-                <span className={`absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-card ${statusTone.dot} ring-4 ${statusTone.ring}`}>
-                  <StatusIcon className="h-3 w-3 text-white" />
+                <span className={`absolute -bottom-1 -right-1 inline-flex h-6 w-6 items-center justify-center rounded-full border-2 border-card ${statusTone.dot} ring-4 ${statusTone.ring}`}>
+                  <StatusIcon className="h-3.5 w-3.5 text-white" />
                 </span>
               </div>
-              <div className="pb-1">
-                <h3 className="font-display text-xl font-semibold leading-tight sm:text-2xl">{user.name}</h3>
-                <a href={`mailto:${user.email}`} className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition sm:text-sm">
-                  <Mail className="h-3.5 w-3.5" /> {user.email}
-                </a>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <PlanPill plan={user.plan} />
-                  <StatusPill status={user.status} />
-                  <span className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-                    {user.id}
-                  </span>
-                </div>
+
+              <div className="mb-1 flex flex-wrap items-center gap-2">
+                <PlanPill plan={user.plan} />
+                <StatusPill status={user.status} />
+                <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+                  {user.id}
+                </span>
               </div>
             </div>
           </div>
@@ -935,7 +1071,7 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
               icon={ShoppingBag}
               label="Orders"
               value={String(user.orders)}
-              sub={user.orders > 0 ? 'Purchases to date' : 'No purchases yet'}
+              sub={user.orders > 0 ? `${user.orders} purchases to date` : 'No purchases yet'}
               accent="from-primary/20 to-primary/0"
               iconClass="text-primary bg-primary/10"
             />
@@ -955,12 +1091,15 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
                 <UserIcon className="h-3.5 w-3.5" /> Profile details
               </h4>
               <div className="grid gap-2 sm:grid-cols-2">
-                <DetailRow icon={Globe} label="Country" value={user.country} />
                 <DetailRow icon={Shield} label="Role" value={user.role} />
                 <DetailRow icon={CreditCard} label="Plan" value={user.plan} />
                 <DetailRow icon={StatusIcon} label="Status" value={user.status} />
+                <DetailRow icon={CheckCircle2} label="Email Verification" value={user.email_verified ? 'Verified ✓' : 'Unverified ✗'} />
+                <DetailRow icon={ShoppingBag} label="Active Templates" value={`${user.activeTemplatesCount || 0} active`} />
                 <DetailRow icon={Star} label="Joined" value={formatDate(user.joined)} />
-                <DetailRow icon={Activity} label="Last active" value={formatRelative(user.lastActive)} />
+                <div className="sm:col-span-2">
+                  <DetailRow icon={Globe} label="Location" value={[user.city, user.state, user.country].filter(Boolean).join(', ') || user.country || 'N/A'} />
+                </div>
               </div>
             </div>
 
@@ -976,13 +1115,13 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
                 />
                 <TimelineItem
                   tone="bg-primary"
-                  title="Purchased template"
-                  time="3 days ago"
+                  title={user.orders > 0 ? `Purchased ${user.orders} template(s)` : 'Browsed template catalog'}
+                  time={formatRelative(user.lastActive)}
                 />
                 <TimelineItem
                   tone="bg-amber-500"
-                  title="Updated profile"
-                  time="2 weeks ago"
+                  title={user.email_verified ? 'Email address verified' : 'Updated profile info'}
+                  time={user.lastActive ? formatRelative(user.lastActive) : 'Recent'}
                 />
                 <TimelineItem
                   tone="bg-muted-foreground"
@@ -991,15 +1130,6 @@ function UserInfoModal({ user, onClose }: { user: User; onClose: () => void }) {
                 />
               </ol>
             </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-3 sm:mt-6 sm:pt-4">
-            <button
-              onClick={onClose}
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground sm:px-4 sm:py-2"
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>
@@ -1045,8 +1175,13 @@ function DetailRow({
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  value: string;
+  value?: string | number | null;
 }) {
+  const displayValue =
+    value === undefined || value === null || value === '' || value === 'undefined' || value === 'null'
+      ? 'N/A'
+      : String(value);
+
   return (
     <div className="flex items-center gap-3 rounded-md border border-border/60 bg-card px-3 py-2 transition hover:border-primary/30">
       <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -1054,7 +1189,7 @@ function DetailRow({
       </span>
       <div className="min-w-0">
         <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="truncate text-sm font-medium">{value}</div>
+        <div className="truncate text-sm font-medium">{displayValue}</div>
       </div>
     </div>
   );

@@ -33,9 +33,11 @@ import { Logo } from '@/src/layout/Logo';
 import { LanguageSwitcher, CurrencySwitcher } from '@/src/layout/SiteHeader';
 import { NotificationsBell } from '@/src/components/admin/notifications-bell';
 import { getInitials } from '@/src/lib/auth';
+import { useGetProfileQuery } from '@/src/redux/api/profileApi';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const { data: profileResp } = useGetProfileQuery(undefined, { skip: status !== 'authenticated' });
   const router = useRouter();
   const pathname = usePathname();
 
@@ -76,8 +78,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  const userName = session?.user?.name || 'Administrator';
-  const userEmail = session?.user?.email || 'admin@novakit.app';
+  const profile = profileResp?.data || session?.user;
+  const userName = profile?.name || (session?.user as any)?.name || 'Administrator';
+  const userEmail = profile?.email || (session?.user as any)?.email || 'admin@novakit.app';
+  const userAvatar = profile?.avatar;
 
   // Navigation configurations matched to WAPI routing names
   const menuGroups = [
@@ -213,8 +217,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-border/60">
           <div className="flex items-center justify-between gap-3 w-full">
             <div className="flex items-center gap-3 min-w-0">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-xs font-semibold text-white shadow shrink-0">
-                {getInitials(userName)}
+              <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-gradient text-xs font-semibold text-white shadow shrink-0">
+                {userAvatar ? (
+                  <img src={userAvatar} alt={userName} className="h-full w-full object-cover" />
+                ) : (
+                  getInitials(userName)
+                )}
               </span>
               {sidebarOpen && (
                 <div className="min-w-0 flex-1">

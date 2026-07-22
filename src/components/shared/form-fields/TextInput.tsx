@@ -57,7 +57,8 @@ export function TextInput({
           name={name}
           type={resolvedType}
           className={cn(
-            'w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 px-3.5 py-2.5 text-sm text-neutral-900 dark:text-white outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors placeholder:text-neutral-400',
+            'w-full h-11 rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-muted-foreground',
+            'disabled:opacity-60 disabled:cursor-not-allowed disabled:select-none',
             Icon && 'pl-10',
             isPassword && 'pr-10',
             error && 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500',

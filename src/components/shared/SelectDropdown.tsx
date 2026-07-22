@@ -64,9 +64,9 @@ export function SelectDropdown({
         </div>
       </SelectTrigger>
       <SelectContent align="start" className={cn('min-w-[120px] rounded-xl shadow-xl bg-card border-border z-50', contentClassName)}>
-        {formattedOptions.map((opt) => (
+        {formattedOptions.map((opt, idx) => (
           <SelectItem
-            key={opt.value}
+            key={`${opt.value}-${idx}`}
             value={opt.value}
             className="rounded-lg cursor-pointer focus:bg-brand/10 focus:text-brand text-xs font-medium flex items-center gap-2 py-2"
           >

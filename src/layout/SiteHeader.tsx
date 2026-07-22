@@ -23,10 +23,13 @@ import { authStore, getInitials, useAuth } from '@/src/lib/auth';
 import { i18nStore, useI18n } from '@/src/lib/i18n';
 import { currencyStore, useCurrency } from '@/src/lib/currency';
 import { signOut as nextAuthSignOut } from 'next-auth/react';
+import { useGetProfileQuery } from '@/src/redux/api/profileApi';
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const { user: authUser, isAuthenticated } = useAuth();
+  const { data: profileResp } = useGetProfileQuery(undefined, { skip: !isAuthenticated });
+  const profile = profileResp?.data || authUser;
   const { t } = useI18n();
   const pathname = usePathname();
 
@@ -63,8 +66,14 @@ export function SiteHeader() {
           <LanguageSwitcher />
           <CurrencySwitcher />
           <ThemeToggle />
-          {isAuthenticated && user ? (
-            <UserMenu name={user.name} email={user.email} plan={user.plan} role={user.role} />
+          {isAuthenticated && profile ? (
+            <UserMenu
+              name={profile.name}
+              email={profile.email}
+              plan={profile.plan}
+              role={profile.role}
+              avatar={profile.avatar}
+            />
           ) : (
             <>
               <Link
@@ -183,7 +192,19 @@ export function LanguageSwitcher() {
   );
 }
 
-function UserMenu({ name, email, plan, role }: { name: string; email: string; plan: string; role?: string }) {
+function UserMenu({
+  name,
+  email,
+  plan,
+  role,
+  avatar,
+}: {
+  name: string;
+  email: string;
+  plan?: string | null;
+  role?: string;
+  avatar?: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -206,8 +227,12 @@ function UserMenu({ name, email, plan, role }: { name: string; email: string; pl
         aria-label="Open profile menu"
         className="group inline-flex items-center gap-2 rounded-full border border-border bg-card/70 py-1 pl-1 pr-3 text-sm transition hover:border-brand/40"
       >
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-gradient text-[11px] font-semibold text-white">
-          {getInitials(name)}
+        <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-brand-gradient text-[11px] font-semibold text-white">
+          {avatar ? (
+            <img src={avatar} alt={name} className="h-full w-full object-cover" />
+          ) : (
+            getInitials(name)
+          )}
         </span>
         <span className="hidden max-w-[110px] truncate text-xs font-medium sm:inline">{name}</span>
       </button>
@@ -215,26 +240,31 @@ function UserMenu({ name, email, plan, role }: { name: string; email: string; pl
         <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-popover shadow-xl shadow-black/10">
           <div className="border-b border-border/60 bg-card/60 p-3">
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
-                {getInitials(name)}
+              <span className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-brand-gradient text-sm font-semibold text-white">
+                {avatar ? (
+                  <img src={avatar} alt={name} className="h-full w-full object-cover" />
+                ) : (
+                  getInitials(name)
+                )}
               </span>
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{name}</div>
                 <div className="truncate text-xs text-muted-foreground">{email}</div>
               </div>
             </div>
-            <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-brand">
-              {plan} plan
-            </div>
+            {plan && (
+              <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-brand">
+                {plan} plan
+              </div>
+            )}
           </div>
           <div className="p-1 text-sm">
             {isAdmin && (
               <MenuLink href="/admin" icon={Shield} label={t('Admin dashboard')} onClose={() => setOpen(false)} />
             )}
-            <MenuLink href="/profile" icon={UserIcon} label={t('Your profile')} onClose={() => setOpen(false)} />
-            <MenuLink href="/profile" icon={ShoppingBag} label={t('Purchases & downloads')} onClose={() => setOpen(false)} />
-            <MenuLink href="/profile" icon={Receipt} label={t('Billing & invoices')} onClose={() => setOpen(false)} />
-            <MenuLink href="/profile" icon={SettingsIcon} label={t('Settings')} onClose={() => setOpen(false)} />
+            <MenuLink href="/profile?tab=settings" icon={UserIcon} label={t('Your profile')} onClose={() => setOpen(false)} />
+            <MenuLink href="/profile?tab=purchases" icon={ShoppingBag} label={t('Purchases & downloads')} onClose={() => setOpen(false)} />
+            <MenuLink href="/profile?tab=billing" icon={Receipt} label={t('Billing & invoices')} onClose={() => setOpen(false)} />
           </div>
           <div className="border-t border-border/60 p-1">
             <button

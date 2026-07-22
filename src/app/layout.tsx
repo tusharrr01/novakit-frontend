@@ -16,6 +16,7 @@ const dmSans = DM_Sans({
 });
 
 import type { Metadata } from 'next';
+import { Toaster } from '@/src/elements/ui/sonner';
 
 export const metadata: Metadata = {
   title: 'NovaKit',
@@ -39,6 +40,7 @@ export default function RootLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <DynamicSettingsProvider>
                 {children}
+                <Toaster />
               </DynamicSettingsProvider>
             </ThemeProvider>
           </ReduxProvider>

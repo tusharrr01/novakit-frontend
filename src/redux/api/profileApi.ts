@@ -16,21 +16,14 @@ export const profileApi = baseApi.injectEndpoints({
     }),
     changePassword: builder.mutation({
       query: (body) => ({
-        url: '/auth/change-password',
+        url: '/auth/profile/change-password',
         method: 'PUT',
         body,
       }),
     }),
-    toggleTwoFactor: builder.mutation({
-      query: () => ({
-        url: '/auth/2fa',
-        method: 'PUT',
-      }),
-      invalidatesTags: ['Profile'],
-    }),
     deleteAccount: builder.mutation({
       query: () => ({
-        url: '/auth/account',
+        url: '/auth/profile/account',
         method: 'DELETE',
       }),
       invalidatesTags: ['Profile'],
@@ -42,7 +35,6 @@ export const {
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
-  useToggleTwoFactorMutation,
   useDeleteAccountMutation,
 } = profileApi;
 export default profileApi;
