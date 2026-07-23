@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import {
@@ -8,40 +10,47 @@ import {
 
 type Props = { location: 'landing' | 'shop' };
 
+function useIsDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+  return isDark;
+}
+
 export function AnnouncementMarquee({ location }: Props) {
   const { marquee } = useAnnouncements();
   const [hidden, setHidden] = useState(true);
+  const isDark = useIsDarkMode();
+
+  const bgColor = isDark && marquee?.darkBackgroundColor ? marquee.darkBackgroundColor : marquee?.backgroundColor;
+  const txtColor = isDark && marquee?.darkTextColor ? marquee.darkTextColor : marquee?.textColor;
 
   useEffect(() => {
-    if (!marquee.enabled) return setHidden(true);
-    if (location === 'landing' && !marquee.showOnLanding) return setHidden(true);
-    if (location === 'shop' && !marquee.showOnShop) return setHidden(true);
-    if (marquee.dismissible && isMarqueeDismissed(marquee.message))
+    if (!marquee?.enabled) return setHidden(true);
+    if (location === 'landing' && !marquee?.showOnLanding) return setHidden(true);
+    if (location === 'shop' && !marquee?.showOnShop) return setHidden(true);
+    if (marquee?.dismissible && isMarqueeDismissed(marquee.message))
       return setHidden(true);
     setHidden(false);
-  }, [marquee, location]);
+  }, [marquee?.enabled, marquee?.showOnLanding, marquee?.showOnShop, marquee?.dismissible, marquee?.message, location]);
 
   if (hidden || !marquee.message.trim()) return null;
 
   const item = (
-    <span className="mx-8 inline-flex items-center gap-3 whitespace-nowrap text-sm font-medium">
+    <span className="mx-3 whitespace-nowrap text-sm font-medium">
       {marquee.message}
-      {marquee.ctaLabel && marquee.ctaUrl && (
-        <a
-          href={marquee.ctaUrl}
-          className="rounded-full border border-white/40 px-3 py-0.5 text-xs font-semibold hover:bg-white/10"
-          style={{ color: marquee.textColor }}
-        >
-          {marquee.ctaLabel}
-        </a>
-      )}
     </span>
   );
 
   return (
     <div
-      className="relative w-full overflow-hidden"
-      style={{ backgroundColor: marquee.backgroundColor, color: marquee.textColor }}
+      className="relative w-full overflow-hidden transition-colors duration-300"
+      style={{ backgroundColor: bgColor, color: txtColor }}
       role="region"
       aria-label="Site announcement"
     >
