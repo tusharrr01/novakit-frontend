@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Repeat, MousePointerClick, Clock } from 'lucide-react';
+import { Sparkles, Radio, PartyPopper, Cake } from 'lucide-react';
 import type { PopupTrigger, PopupVariantSettings, AnnouncementsSettings } from '@/src/lib/announcements';
 import { PopupVariantEditor } from './PopupVariantEditor';
+import { FestivalEditor } from './FestivalEditor';
 
 const TRIGGERS: { key: PopupTrigger; label: string; description: string; icon: any }[] = [
-  { key: 'firstLogin', label: 'First login', description: 'Show once, the very first time a user logs in.', icon: Sparkles },
-  { key: 'everyLogin', label: 'Every login', description: 'Show once per session after login.', icon: Repeat },
-  { key: 'onceEver', label: 'Once ever', description: 'Show once per browser until they dismiss.', icon: MousePointerClick },
-  { key: 'everyVisit', label: 'Every visit', description: 'Show every page load until dismissed for this version.', icon: Clock },
+  { key: 'welcome', label: 'Welcome Popup', description: 'Show once, the very first time a user logs in.', icon: Sparkles },
+  { key: 'broadcast', label: 'Broadcast', description: 'Shows on arrival; expires 7 days after creation.', icon: Radio },
+  { key: 'festival', label: 'Festival Wishing', description: 'Shows on festival date only; expires after 24h.', icon: PartyPopper },
+  { key: 'birthday', label: 'Birthday Wishing', description: 'Shows on user\'s birthdate only; expires after 24h.', icon: Cake },
 ];
 
 export function PopupWorkspace({
@@ -22,13 +23,12 @@ export function PopupWorkspace({
   onPreview: () => void;
 }) {
   const p = draft.popup;
-  const activeTrigger = p.trigger;
-  const activeVariant = p.variants[activeTrigger];
+  const activeTrigger: PopupTrigger = p.trigger || 'welcome';
 
   const setTrigger = (trigger: PopupTrigger) =>
     setDraft({ ...draft, popup: { ...p, trigger } });
 
-  const patchVariant = (trigger: PopupTrigger, patch: Partial<PopupVariantSettings>) => {
+  const patchVariant = (trigger: 'welcome' | 'broadcast' | 'birthday', patch: Partial<PopupVariantSettings>) => {
     setDraft({
       ...draft,
       popup: {
@@ -41,22 +41,30 @@ export function PopupWorkspace({
     });
   };
 
+  const isTriggerEnabled = (key: PopupTrigger) => {
+    if (key === 'festival') {
+      const activeFest = p.festival?.festivals?.find((f) => f.id === p.festival?.activeFestivalId) || p.festival?.festivals?.[0];
+      return activeFest ? activeFest.enabled : false;
+    }
+    return p.variants[key]?.enabled ?? false;
+  };
+
   return (
     <div className="mt-5 flex min-h-0 flex-1 gap-5 overflow-hidden">
-      {/* Left: trigger sub-section cards (non-scrolled) */}
+      {/* Left: trigger sub-section cards */}
       <div className="hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 lg:flex">
         <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Trigger sub-sections
         </div>
         {TRIGGERS.map((t) => {
           const TIcon = t.icon;
-          const variant = p.variants[t.key];
+          const enabled = isTriggerEnabled(t.key);
           const isActive = activeTrigger === t.key;
           return (
             <button
               key={t.key}
               onClick={() => setTrigger(t.key)}
-              className={`flex flex-col gap-1 rounded-xl border p-4 text-left transition ${
+              className={`flex flex-col gap-1 rounded-xl border p-4 text-left transition cursor-pointer ${
                 isActive
                   ? 'border-brand/40 bg-brand/5 ring-1 ring-brand/20'
                   : 'border-border bg-background hover:border-brand/30 hover:bg-muted/30'
@@ -71,12 +79,12 @@ export function PopupWorkspace({
                 </span>
                 <span
                   className={`rounded-md px-1.5 py-px text-[9px] font-semibold uppercase ${
-                    variant.enabled
+                    enabled
                       ? 'bg-emerald-500/15 text-emerald-500'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
-                  {variant.enabled ? 'on' : 'off'}
+                  {enabled ? 'on' : 'off'}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">{t.description}</p>
@@ -90,13 +98,13 @@ export function PopupWorkspace({
         <div className="grid grid-cols-2 gap-3">
           {TRIGGERS.map((t) => {
             const TIcon = t.icon;
-            const variant = p.variants[t.key];
+            const enabled = isTriggerEnabled(t.key);
             const isActive = activeTrigger === t.key;
             return (
               <button
                 key={t.key}
                 onClick={() => setTrigger(t.key)}
-                className={`flex flex-col gap-1 rounded-xl border p-3 text-left transition ${
+                className={`flex flex-col gap-1 rounded-xl border p-3 text-left transition cursor-pointer ${
                   isActive
                     ? 'border-brand/40 bg-brand/5 ring-1 ring-brand/20'
                     : 'border-border bg-background hover:border-brand/30'
@@ -109,12 +117,12 @@ export function PopupWorkspace({
                   </span>
                   <span
                     className={`rounded-md px-1 py-px text-[8px] font-semibold uppercase ${
-                      variant.enabled
+                      enabled
                         ? 'bg-emerald-500/15 text-emerald-500'
                         : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {variant.enabled ? 'on' : 'off'}
+                    {enabled ? 'on' : 'off'}
                   </span>
                 </div>
                 <p className="text-[11px] leading-tight text-muted-foreground">{t.description}</p>
@@ -126,14 +134,16 @@ export function PopupWorkspace({
 
       {/* Right: editor for selected trigger */}
       <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-        <PopupVariantEditor
-          popup={p}
-          trigger={activeTrigger}
-          variant={activeVariant}
-          onPatch={(patch) => patchVariant(activeTrigger, patch)}
-          onToggleMaster={(enabled) => setDraft({ ...draft, popup: { ...p, enabled } })}
-          onPreview={onPreview}
-        />
+        {activeTrigger === 'festival' ? (
+          <FestivalEditor draft={draft} setDraft={setDraft} />
+        ) : (
+          <PopupVariantEditor
+            popup={p}
+            trigger={activeTrigger}
+            variant={p.variants[activeTrigger]}
+            onPatch={(patch) => patchVariant(activeTrigger, patch)}
+          />
+        )}
       </div>
     </div>
   );
