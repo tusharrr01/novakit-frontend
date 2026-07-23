@@ -1,10 +1,23 @@
 import type { AnnouncementsSettings, PopupVariantSettings } from '@/src/lib/announcements';
 
+function cleanSettings(obj: any): any {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(cleanSettings);
+
+  const clean: any = {};
+  for (const key of Object.keys(obj).sort()) {
+    if (['_id', '__v', 'created_at', 'updated_at', 'broadcastUpdatedAt'].includes(key)) continue;
+    clean[key] = cleanSettings(obj[key]);
+  }
+  return clean;
+}
+
 /**
  * Checks if the current local drafts are dirty (different from the remote settings)
  */
 export function checkSettingsDirty(draft: AnnouncementsSettings, remote: AnnouncementsSettings): boolean {
-  return JSON.stringify(draft) !== JSON.stringify(remote);
+  if (!draft || !remote) return false;
+  return JSON.stringify(cleanSettings(draft)) !== JSON.stringify(cleanSettings(remote));
 }
 
 /**
@@ -13,8 +26,26 @@ export function checkSettingsDirty(draft: AnnouncementsSettings, remote: Announc
 export function getEnabledPopupVariant(settings: AnnouncementsSettings): PopupVariantSettings | null {
   if (!settings.popup.enabled) return null;
   const trigger = settings.popup.trigger;
-  const variant = settings.popup.variants[trigger];
-  return variant.enabled ? variant : null;
+  if (trigger === 'festival') {
+    const festData = settings.popup.festival;
+    const festivals = festData?.festivals || [];
+    const activeFest = festivals.find((f) => f.id === festData?.activeFestivalId) || festivals[0];
+    if (!activeFest || !activeFest.enabled) return null;
+    return {
+      enabled: activeFest.enabled,
+      version: 'v1',
+      title: activeFest.title,
+      body: activeFest.body,
+      ctaLabel: activeFest.ctaLabel,
+      ctaUrl: activeFest.ctaUrl,
+      imageUrl: '',
+      dismissible: true,
+      accentColor: activeFest.accentColor,
+      darkAccentColor: activeFest.darkAccentColor,
+    };
+  }
+  const variant = settings.popup.variants[trigger as 'welcome' | 'broadcast' | 'birthday'];
+  return variant && variant.enabled ? variant : null;
 }
 
 /**

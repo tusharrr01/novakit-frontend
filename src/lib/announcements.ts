@@ -1,10 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useGetAnnouncementsQuery } from '@/src/redux/api/announcementApi';
 
-export type PopupTrigger =
-  | 'everyVisit'
-  | 'everyLogin'
-  | 'firstLogin'
-  | 'onceEver';
+export type PopupTrigger = 'welcome' | 'broadcast' | 'festival' | 'birthday';
 
 export type MarqueeSettings = {
   enabled: boolean;
@@ -14,6 +11,8 @@ export type MarqueeSettings = {
   speedSeconds: number; // full loop duration
   backgroundColor: string;
   textColor: string;
+  darkBackgroundColor?: string;
+  darkTextColor?: string;
   dismissible: boolean;
   showOnLanding: boolean;
   showOnShop: boolean;
@@ -21,7 +20,7 @@ export type MarqueeSettings = {
 
 export type PopupVariantSettings = {
   enabled: boolean;
-  version: string; // bump to re-show to users who've dismissed
+  version: string;
   title: string;
   body: string;
   ctaLabel: string;
@@ -29,12 +28,35 @@ export type PopupVariantSettings = {
   imageUrl: string;
   dismissible: boolean;
   accentColor: string;
+  darkAccentColor?: string;
+  broadcastUpdatedAt?: string;
+};
+
+export type FestivalVariant = {
+  id: string;
+  name: string;
+  date: string; // MM-DD or YYYY-MM-DD
+  enabled: boolean;
+  title: string;
+  body: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  accentColor: string;
+  darkAccentColor?: string;
 };
 
 export type PopupSettings = {
   enabled: boolean;
   trigger: PopupTrigger;
-  variants: Record<PopupTrigger, PopupVariantSettings>;
+  variants: {
+    welcome: PopupVariantSettings;
+    broadcast: PopupVariantSettings;
+    birthday: PopupVariantSettings;
+  };
+  festival: {
+    activeFestivalId: string;
+    festivals: FestivalVariant[];
+  };
 };
 
 export type AnnouncementsSettings = {
@@ -42,52 +64,44 @@ export type AnnouncementsSettings = {
   popup: PopupSettings;
 };
 
-const defaultPopupVariants: Record<PopupTrigger, PopupVariantSettings> = {
-  firstLogin: {
+const defaultFestivalVariants: FestivalVariant[] = [
+  {
+    id: 'diwali',
+    name: 'Diwali Wishing',
+    date: '11-01',
     enabled: true,
-    version: 'v1',
-    title: 'Welcome to NovaKit ✨',
-    body: 'Thanks for joining. Grab 20% off your first template with the code NOVA20.',
-    ctaLabel: 'Claim discount',
+    title: '🪔 Happy Diwali, {name}! ✨',
+    body: 'May your year be filled with lights, prosperity, and joy. Enjoy special festival offers today!',
+    ctaLabel: 'View Festival Deals',
     ctaUrl: '/products',
-    imageUrl: '',
-    dismissible: true,
-    accentColor: '#7c3aed',
+    accentColor: '#f59e0b',
+    darkAccentColor: '#fbbf24',
   },
-  everyLogin: {
+  {
+    id: 'christmas',
+    name: 'Christmas Wishing',
+    date: '12-25',
     enabled: true,
-    version: 'v1',
-    title: 'Welcome back 👋',
-    body: 'Check out the latest templates added this week.',
-    ctaLabel: 'Browse new',
+    title: '🎄 Merry Christmas, {name}! 🎁',
+    body: 'Wishing you peace, joy, and all the best this holiday season!',
+    ctaLabel: 'Claim Holiday Gift',
     ctaUrl: '/products',
-    imageUrl: '',
-    dismissible: true,
-    accentColor: '#7c3aed',
+    accentColor: '#ef4444',
+    darkAccentColor: '#f87171',
   },
-  onceEver: {
+  {
+    id: 'newyear',
+    name: 'New Year Wishing',
+    date: '01-01',
     enabled: true,
-    version: 'v1',
-    title: 'Limited time offer',
-    body: 'Get 25% off your first purchase. Offer ends soon.',
-    ctaLabel: 'Shop now',
+    title: '🎆 Happy New Year, {name}! 🥂',
+    body: 'Cheers to a new year of growth and success! Grab our New Year special discounts.',
+    ctaLabel: 'Explore Offers',
     ctaUrl: '/products',
-    imageUrl: '',
-    dismissible: true,
-    accentColor: '#7c3aed',
+    accentColor: '#10b981',
+    darkAccentColor: '#34d399',
   },
-  everyVisit: {
-    enabled: true,
-    version: 'v1',
-    title: "Don't miss out",
-    body: 'Subscribe to our newsletter for exclusive deals.',
-    ctaLabel: 'Subscribe',
-    ctaUrl: '/products',
-    imageUrl: '',
-    dismissible: true,
-    accentColor: '#7c3aed',
-  },
-};
+];
 
 export const defaultAnnouncements: AnnouncementsSettings = {
   marquee: {
@@ -99,14 +113,58 @@ export const defaultAnnouncements: AnnouncementsSettings = {
     speedSeconds: 28,
     backgroundColor: '#7c3aed',
     textColor: '#ffffff',
+    darkBackgroundColor: '#4c1d95',
+    darkTextColor: '#ffffff',
     dismissible: true,
     showOnLanding: true,
     showOnShop: true,
   },
   popup: {
     enabled: true,
-    trigger: 'firstLogin',
-    variants: defaultPopupVariants,
+    trigger: 'welcome',
+    variants: {
+      welcome: {
+        enabled: true,
+        version: 'v1',
+        title: 'Welcome to NovaKit ✨',
+        body: 'Thanks for joining us! Explore our premium tools & templates.',
+        ctaLabel: 'Get Started',
+        ctaUrl: '/products',
+        imageUrl: '',
+        dismissible: true,
+        accentColor: '#7c3aed',
+        darkAccentColor: '#a855f7',
+      },
+      broadcast: {
+        enabled: true,
+        version: 'v1',
+        title: '📢 Platform Announcement',
+        body: 'Important update for all users: check out our newest features!',
+        ctaLabel: 'Learn More',
+        ctaUrl: '/products',
+        imageUrl: '',
+        dismissible: true,
+        accentColor: '#3b82f6',
+        darkAccentColor: '#60a5fa',
+        broadcastUpdatedAt: new Date().toISOString(),
+      },
+      birthday: {
+        enabled: true,
+        version: 'v1',
+        title: '🎂 Happy Birthday, {name}! 🎉',
+        body: 'Wishing you a wonderful birthday! Enjoy a special celebration discount on us today.',
+        ctaLabel: 'Claim Birthday Gift',
+        ctaUrl: '/products',
+        imageUrl: '',
+        dismissible: true,
+        accentColor: '#ec4899',
+        darkAccentColor: '#f472b6',
+      },
+    },
+    festival: {
+      activeFestivalId: 'diwali',
+      festivals: defaultFestivalVariants,
+    },
   },
 };
 
@@ -118,40 +176,39 @@ function mergePopupSettings(stored: any): PopupSettings {
   const base = defaultAnnouncements.popup;
   if (!stored) return base;
 
-  // Migrate old flat popup format (pre-variants) to the new per-trigger shape.
-  if (!stored.variants) {
-    const trigger: PopupTrigger = stored.trigger || 'firstLogin';
-    const fallback = base.variants[trigger];
-    const variant: PopupVariantSettings = {
-      enabled: true,
-      version: stored.version || fallback.version,
-      title: stored.title || fallback.title,
-      body: stored.body || fallback.body,
-      ctaLabel: stored.ctaLabel || fallback.ctaLabel,
-      ctaUrl: stored.ctaUrl || fallback.ctaUrl,
-      imageUrl: stored.imageUrl || fallback.imageUrl,
-      dismissible: stored.dismissible ?? fallback.dismissible,
-      accentColor: stored.accentColor || fallback.accentColor,
-    };
-    return {
-      enabled: stored.enabled ?? base.enabled,
-      trigger,
-      variants: {
-        ...base.variants,
-        [trigger]: variant,
-      },
-    };
-  }
+  const validTriggers: PopupTrigger[] = ['welcome', 'broadcast', 'festival', 'birthday'];
+  const trigger: PopupTrigger = validTriggers.includes(stored.trigger) ? stored.trigger : 'welcome';
 
-  const variants = { ...base.variants };
-  for (const key of Object.keys(base.variants) as PopupTrigger[]) {
-    variants[key] = { ...base.variants[key], ...(stored.variants[key] || {}) };
-  }
+  const variants = {
+    welcome: { ...base.variants.welcome, ...(stored.variants?.welcome || stored.variants?.firstLogin || {}) },
+    broadcast: { ...base.variants.broadcast, ...(stored.variants?.broadcast || stored.variants?.onceEver || {}) },
+    birthday: { ...base.variants.birthday, ...(stored.variants?.birthday || stored.variants?.everyLogin || {}) },
+  };
+
+  const festivalData = stored.festival || {};
+  const festivalsList: FestivalVariant[] = Array.isArray(festivalData.festivals) && festivalData.festivals.length > 0
+    ? festivalData.festivals.map((f: any) => ({
+        id: f.id || f._id || 'fest',
+        name: f.name || 'Festival',
+        date: f.date || '11-01',
+        enabled: f.enabled ?? true,
+        title: f.title || '',
+        body: f.body || '',
+        ctaLabel: f.ctaLabel || '',
+        ctaUrl: f.ctaUrl || '/products',
+        accentColor: f.accentColor || '#f59e0b',
+        darkAccentColor: f.darkAccentColor || '#fbbf24',
+      }))
+    : base.festival.festivals;
 
   return {
     enabled: stored.enabled ?? base.enabled,
-    trigger: stored.trigger || base.trigger,
+    trigger,
     variants,
+    festival: {
+      activeFestivalId: festivalData.activeFestivalId || festivalsList[0]?.id || 'diwali',
+      festivals: festivalsList,
+    },
   };
 }
 
@@ -197,11 +254,21 @@ export const announcementsStore = {
   },
 };
 
+export function normalizeAnnouncements(data: any): AnnouncementsSettings {
+  if (!data) return defaultAnnouncements;
+  return {
+    marquee: { ...defaultAnnouncements.marquee, ...(data.marquee || {}) },
+    popup: mergePopupSettings(data.popup),
+  };
+}
+
 export function useAnnouncements(): AnnouncementsSettings {
-  const [state, setState] = useState<AnnouncementsSettings>(defaultAnnouncements);
+  const { data: resp } = useGetAnnouncementsQuery(undefined);
+  const [localState, setLocalState] = useState<AnnouncementsSettings>(defaultAnnouncements);
+
   useEffect(() => {
-    setState(read());
-    const on = () => setState(read());
+    setLocalState(read());
+    const on = () => setLocalState(read());
     listeners.add(on);
     window.addEventListener(EVENT, on);
     window.addEventListener('storage', on);
@@ -211,13 +278,18 @@ export function useAnnouncements(): AnnouncementsSettings {
       window.removeEventListener('storage', on);
     };
   }, []);
-  return state;
+
+  return useMemo(() => {
+    if (resp?.data) {
+      return normalizeAnnouncements(resp.data);
+    }
+    return localState;
+  }, [resp?.data, localState]);
 }
 
-// Dismiss tracking (marquee: per-message; popup: per-version per trigger)
+// Dismiss tracking (marquee: per-message; popup: per-key/version)
 const MARQUEE_DISMISS_KEY = 'novakit:marquee-dismissed';
 const POPUP_DISMISS_KEY = 'novakit:popup-dismissed';
-const POPUP_SESSION_KEY = 'novakit:popup-session-shown';
 
 export function isMarqueeDismissed(message: string): boolean {
   if (typeof window === 'undefined') return false;
@@ -230,20 +302,22 @@ export function dismissMarquee(message: string) {
 
 export function isPopupDismissedForVersion(version: string): boolean {
   if (typeof window === 'undefined') return false;
-  return window.localStorage.getItem(POPUP_DISMISS_KEY) === version;
+  return window.localStorage.getItem(`${POPUP_DISMISS_KEY}:${version}`) === 'true';
 }
 export function dismissPopup(version: string) {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(POPUP_DISMISS_KEY, version);
+  window.localStorage.setItem(`${POPUP_DISMISS_KEY}:${version}`, 'true');
 }
+
+const POPUP_SESSION_KEY = 'novakit:popup-session-shown';
 
 export function markPopupShownThisSession(version: string) {
   if (typeof window === 'undefined') return;
-  window.sessionStorage.setItem(POPUP_SESSION_KEY, version);
+  window.sessionStorage.setItem(`${POPUP_SESSION_KEY}:${version}`, 'true');
 }
 export function wasPopupShownThisSession(version: string): boolean {
   if (typeof window === 'undefined') return false;
-  return window.sessionStorage.getItem(POPUP_SESSION_KEY) === version;
+  return window.sessionStorage.getItem(`${POPUP_SESSION_KEY}:${version}`) === 'true';
 }
 
 function hash(s: string) {

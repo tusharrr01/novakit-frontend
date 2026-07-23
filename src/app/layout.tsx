@@ -17,6 +17,7 @@ const dmSans = DM_Sans({
 
 import type { Metadata } from 'next';
 import { Toaster } from '@/src/elements/ui/sonner';
+import { AnnouncementPopup } from '@/src/layout/AnnouncementPopup';
 
 export const metadata: Metadata = {
   title: 'NovaKit',
@@ -40,6 +41,7 @@ export default function RootLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
               <DynamicSettingsProvider>
                 {children}
+                <AnnouncementPopup />
                 <Toaster />
               </DynamicSettingsProvider>
             </ThemeProvider>
